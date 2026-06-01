@@ -37,14 +37,14 @@ import {
 } from "./relatorios.js";
 
 // ─── ESTADO LOCAL ─────────────────────────────────────────────────────────────
-let _produtos     = [];   // cache dos produtos (atualizado pelo onSnapshot)
-let _pedidosDia   = [];   // cache dos pedidos do dia selecionado
-let _pedidosMes   = [];   // cache dos pedidos do mês selecionado
+let _produtos = []; // cache dos produtos (atualizado pelo onSnapshot)
+let _pedidosDia = []; // cache dos pedidos do dia selecionado
+let _pedidosMes = []; // cache dos pedidos do mês selecionado
 
 // Funções de cancelamento dos listeners ativos (evita memory leak ao trocar tabs)
-let _unsubProdutos  = null;
-let _unsubPedidos   = null;
-let _unsubPedMes    = null;
+let _unsubProdutos = null;
+let _unsubPedidos = null;
+let _unsubPedMes = null;
 
 // ─── BOOTSTRAP ───────────────────────────────────────────────────────────────
 // Chamado quando admin.html carrega. Observa estado do auth e exibe tela
@@ -58,7 +58,7 @@ export function initAdmin() {
     () => {
       // Sem sessão / sem permissão → exibir tela de login
       showLogin();
-    }
+    },
   );
 
   // Configurar formulário de login
@@ -70,9 +70,9 @@ export function initAdmin() {
 // ─── LOGIN / LOGOUT ──────────────────────────────────────────────────────────
 export async function doLogin() {
   const email = document.getElementById("login-email").value.trim();
-  const pw    = document.getElementById("login-pw").value;
+  const pw = document.getElementById("login-pw").value;
   const errEl = document.getElementById("login-err");
-  const btn   = document.getElementById("login-btn");
+  const btn = document.getElementById("login-btn");
 
   if (!email || !pw) {
     errEl.textContent = "Preencha e-mail e senha.";
@@ -81,7 +81,7 @@ export async function doLogin() {
   }
 
   btn.disabled = true;
-  btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Entrando...';
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Entrando...';
   errEl.style.display = "none";
 
   try {
@@ -107,12 +107,12 @@ export async function doLogout() {
 // ─── CONTROLE DE TELAS ───────────────────────────────────────────────────────
 function showLogin() {
   document.getElementById("login-screen").style.display = "flex";
-  document.getElementById("admin-app").style.display  = "none";
+  document.getElementById("admin-app").style.display = "none";
 }
 
 function showApp(user, perfil) {
   document.getElementById("login-screen").style.display = "none";
-  document.getElementById("admin-app").style.display  = "block";
+  document.getElementById("admin-app").style.display = "block";
 
   // Exibir nome do usuário no header
   const nameEl = document.getElementById("admin-user-name");
@@ -125,16 +125,20 @@ function showApp(user, perfil) {
 
 // ─── TABS ─────────────────────────────────────────────────────────────────────
 export function showTab(id) {
-  document.querySelectorAll(".tab-panel").forEach(p => p.classList.remove("active"));
-  document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+  document
+    .querySelectorAll(".tab-panel")
+    .forEach((p) => p.classList.remove("active"));
+  document
+    .querySelectorAll(".tab-btn")
+    .forEach((b) => b.classList.remove("active"));
 
   document.getElementById(id)?.classList.add("active");
   document.querySelector(`[data-tab="${id}"]`)?.classList.add("active");
 
   // Iniciar dados da tab selecionada
-  if (id === "tab-dashboard")  startDashboard();
-  if (id === "tab-produtos")   startProdutos();
-  if (id === "tab-pedidos")    startPedidos();
+  if (id === "tab-dashboard") startDashboard();
+  if (id === "tab-produtos") startProdutos();
+  if (id === "tab-pedidos") startPedidos();
   if (id === "tab-relatorios") startRelatorios();
 }
 
@@ -153,7 +157,7 @@ function startDashboard() {
   _unsubProdutos?.();
   _unsubProdutos = watchProdutosAdmin((produtos) => {
     _produtos = produtos;
-    const esgotados = produtos.filter(p => p.esgotado).length;
+    const esgotados = produtos.filter((p) => p.esgotado).length;
     const el = document.getElementById("dash-esgotados");
     if (el) el.textContent = esgotados;
   });
@@ -161,11 +165,12 @@ function startDashboard() {
 
 function renderDashboard(pedidos) {
   const r = calcularResumo(pedidos);
-  const fmt = (v) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+  const fmt = (v) =>
+    v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
-  setEl("dash-total",      fmt(r.total));
-  setEl("dash-pedidos",    r.quantidade);
-  setEl("dash-ticket",     fmt(r.ticketMedio));
+  setEl("dash-total", fmt(r.total));
+  setEl("dash-pedidos", r.quantidade);
+  setEl("dash-ticket", fmt(r.ticketMedio));
   setEl("dash-mais-vendido", produtoMaisVendido(pedidos));
 }
 
@@ -191,18 +196,22 @@ function renderTabelaProdutos(produtos) {
     return;
   }
 
-  tbody.innerHTML = produtos.map((p) => {
-    const statusBadge = p.esgotado
-      ? `<span class="badge badge-red">Esgotado</span>`
-      : p.ativo
-        ? `<span class="badge badge-green">Disponível</span>`
-        : `<span class="badge badge-gray">Inativo</span>`;
+  tbody.innerHTML = produtos
+    .map((p) => {
+      const statusBadge = p.esgotado
+        ? `<span class="badge badge-red">Esgotado</span>`
+        : p.ativo
+          ? `<span class="badge badge-green">Disponível</span>`
+          : `<span class="badge badge-gray">Inativo</span>`;
 
-    const preco = (p.preco || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+      const preco = (p.preco || 0).toLocaleString("pt-BR", {
+        style: "currency",
+        currency: "BRL",
+      });
 
-    return `
+      return `
       <tr>
-        <td><img src="${p.imagem || 'assets/logo1.png'}" alt="${p.nome}" class="prod-thumb"></td>
+        <td><img src="${p.imagem || "assets/logo1.png"}" alt="${p.nome}" class="prod-thumb"></td>
         <td class="prod-nome">${p.nome}</td>
         <td>${p.categoria || "—"}</td>
         <td>${preco}</td>
@@ -217,22 +226,23 @@ function renderTabelaProdutos(produtos) {
           <button class="btn-icon" title="Editar" onclick="window._adminEditarProduto('${p.id}')">
             <i class="fa fa-pen"></i>
           </button>
-          <button class="btn-icon btn-icon-red" title="${p.esgotado ? 'Reativar' : 'Marcar Esgotado'}"
+          <button class="btn-icon btn-icon-red" title="${p.esgotado ? "Reativar" : "Marcar Esgotado"}"
             onclick="window._adminToggleEsgotado('${p.id}', ${p.esgotado})">
-            <i class="fa fa-${p.esgotado ? 'check' : 'ban'}"></i>
+            <i class="fa fa-${p.esgotado ? "check" : "ban"}"></i>
           </button>
-          <button class="btn-icon btn-icon-gray" title="${p.ativo ? 'Desativar' : 'Reativar'}"
+          <button class="btn-icon btn-icon-gray" title="${p.ativo ? "Desativar" : "Reativar"}"
             onclick="window._adminToggleAtivo('${p.id}', ${p.ativo})">
-            <i class="fa fa-${p.ativo ? 'eye-slash' : 'eye'}"></i>
+            <i class="fa fa-${p.ativo ? "eye-slash" : "eye"}"></i>
           </button>
           <button class="btn-icon btn-icon-danger" title="Excluir"
-            onclick="window._adminExcluir('${p.id}', '${p.nome.replace(/'/g,"\\'")}')">
+            onclick="window._adminExcluir('${p.id}', '${p.nome.replace(/'/g, "\\'")}')">
             <i class="fa fa-trash"></i>
           </button>
         </td>
       </tr>
     `;
-  }).join("");
+    })
+    .join("");
 }
 
 // Expor funções chamadas via onclick no HTML gerado
@@ -244,14 +254,14 @@ window._adminToggleEsgotado = async (id, atual) => {
 };
 window._adminToggleAtivo = async (id, atual) => {
   if (atual) await desativarProduto(id);
-  else        await reativarProduto(id);
+  else await reativarProduto(id);
 };
 window._adminExcluir = async (id, nome) => {
   if (!confirm(`Excluir "${nome}"? Esta ação não pode ser desfeita.`)) return;
   await deleteProduto(id);
 };
 window._adminEditarProduto = (id) => {
-  const p = _produtos.find(x => x.id === id);
+  const p = _produtos.find((x) => x.id === id);
   if (!p) return;
   abrirModalProduto(p);
 };
@@ -265,14 +275,14 @@ export function abrirModalProduto(produto = null) {
   titulo.textContent = produto ? "Editar Produto" : "Novo Produto";
 
   // Preencher campos
-  document.getElementById("prod-id").value       = produto?.id        || "";
-  document.getElementById("prod-nome").value      = produto?.nome      || "";
-  document.getElementById("prod-desc").value      = produto?.descricao || "";
-  document.getElementById("prod-preco").value     = produto?.preco     || "";
-  document.getElementById("prod-imagem").value    = produto?.imagem    || "";
-  document.getElementById("prod-cat").value       = produto?.categoria || "pizza";
-  document.getElementById("prod-estoque").value   = produto?.estoque   ?? 1;
-  document.getElementById("prod-ativo").checked   = produto?.ativo     ?? true;
+  document.getElementById("prod-id").value = produto?.id || "";
+  document.getElementById("prod-nome").value = produto?.nome || "";
+  document.getElementById("prod-desc").value = produto?.descricao || "";
+  document.getElementById("prod-preco").value = produto?.preco || "";
+  document.getElementById("prod-imagem").value = produto?.imagem || "";
+  document.getElementById("prod-cat").value = produto?.categoria || "pizza";
+  document.getElementById("prod-estoque").value = produto?.estoque ?? 1;
+  document.getElementById("prod-ativo").checked = produto?.ativo ?? true;
 
   modal.classList.add("active");
 }
@@ -282,18 +292,21 @@ export function fecharModalProduto() {
 }
 
 export async function salvarProduto() {
-  const id      = document.getElementById("prod-id").value;
-  const dados   = {
-    nome:      document.getElementById("prod-nome").value.trim(),
+  const id = document.getElementById("prod-id").value;
+  const dados = {
+    nome: document.getElementById("prod-nome").value.trim(),
     descricao: document.getElementById("prod-desc").value.trim(),
-    preco:     parseFloat(document.getElementById("prod-preco").value) || 0,
-    imagem:    document.getElementById("prod-imagem").value.trim(),
+    preco: parseFloat(document.getElementById("prod-preco").value) || 0,
+    imagem: document.getElementById("prod-imagem").value.trim(),
     categoria: document.getElementById("prod-cat").value,
-    estoque:   parseInt(document.getElementById("prod-estoque").value) || 0,
-    ativo:     document.getElementById("prod-ativo").checked,
+    estoque: parseInt(document.getElementById("prod-estoque").value) || 0,
+    ativo: document.getElementById("prod-ativo").checked,
   };
 
-  if (!dados.nome) { alert("Informe o nome do produto."); return; }
+  if (!dados.nome) {
+    alert("Informe o nome do produto.");
+    return;
+  }
 
   const btn = document.getElementById("btn-salvar-produto");
   btn.disabled = true;
@@ -301,7 +314,7 @@ export async function salvarProduto() {
 
   try {
     if (id) await editProduto(id, dados);
-    else    await addProduto(dados);
+    else await addProduto(dados);
     fecharModalProduto();
   } catch (err) {
     alert("Erro ao salvar: " + err.message);
@@ -326,7 +339,9 @@ function startPedidos() {
 
 export function carregarPedidosDia() {
   const dateInput = document.getElementById("pedidos-date");
-  const date = dateInput?.value ? new Date(dateInput.value + "T12:00:00") : new Date();
+  const date = dateInput?.value
+    ? new Date(dateInput.value + "T12:00:00")
+    : new Date();
 
   _unsubPedidos?.();
   _unsubPedidos = watchPedidosDia(date, (pedidos) => {
@@ -341,39 +356,60 @@ function renderTabelaPedidos(pedidos) {
 
   if (pedidos.length === 0) {
     container.innerHTML = `<div class="empty-state">
-      <i class="fa fa-receipt"></i>
+      <i class="fas fa-receipt"></i>
       <p>Nenhum pedido nesta data</p>
       <small>Os pedidos aparecerão aqui em tempo real</small>
     </div>`;
     return;
   }
 
-  const payLabels  = { pix: "💠 Pix", cartao: "💳 Cartão", dinheiro: "💵 Dinheiro" };
-  const typeLabels = { delivery: "🛵 Delivery", retirada: "🏪 Retirada" };
+  const payLabels = {
+    pix: '<i class="fas fa-qrcode"></i> Pix',
+    cartao: '<i class="fas fa-credit-card"></i> Cartão',
+    dinheiro: '<i class="fas fa-money-bill-wave"></i> Dinheiro',
+  };
+  const typeLabels = {
+    delivery: '<i class="fas fa-motorcycle"></i> Delivery',
+    retirada: '<i class="fas fa-store"></i> Retirada',
+  };
 
-  container.innerHTML = pedidos.map((p) => {
-    const ts = p.dataPedido?.toDate ? p.dataPedido.toDate() : new Date(p.dataPedido);
-    const dataStr = ts.toLocaleString("pt-BR", { day:"2-digit", month:"2-digit", year:"numeric", hour:"2-digit", minute:"2-digit" });
-    const itensHtml = (p.itens || []).map(i => `${i.quantity || 1}× ${i.name || i.nome}`).join(", ");
-    const payClass  = p.pagamento || "pix";
-    const typeClass = p.tipoPedido || "delivery";
+  container.innerHTML = pedidos
+    .map((p) => {
+      const ts = p.dataPedido?.toDate
+        ? p.dataPedido.toDate()
+        : new Date(p.dataPedido);
+      const dataStr = ts.toLocaleString("pt-BR", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+      const itensHtml = (p.itens || [])
+        .map((i) => `${i.quantity || 1}× ${i.name || i.nome}`)
+        .join(", ");
+      const payClass = p.pagamento || "pix";
+      const typeClass = p.tipoPedido || "delivery";
 
-    const statusOpts = Object.values(STATUS_PEDIDO).map((s) =>
-      `<option value="${s}" ${p.status === s ? "selected" : ""}>${s}</option>`
-    ).join("");
+      const statusOpts = Object.values(STATUS_PEDIDO)
+        .map(
+          (s) =>
+            `<option value="${s}" ${p.status === s ? "selected" : ""}>${s}</option>`,
+        )
+        .join("");
 
-    return `
+      return `
       <div class="order-card">
         <div class="order-card-header">
           <div>
             <span class="order-customer">${p.clienteNome || "Cliente"}</span>
             <span style="font-size:0.75rem;color:#6b7280;margin-left:0.5rem;">${dataStr}</span>
           </div>
-          <span class="order-total">${(p.total || 0).toLocaleString("pt-BR", { style:"currency", currency:"BRL" })}</span>
+          <span class="order-total">${(p.total || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}</span>
         </div>
         <div class="order-date">
-          <i class="fa fa-phone-alt"></i> ${p.telefone || "—"}
-          ${p.endereco ? `&nbsp;·&nbsp;<i class="fa fa-map-marker-alt"></i> ${p.endereco}` : ""}
+          <i class="fas fa-phone-alt"></i> ${p.telefone || "—"}
+          ${p.endereco ? `&nbsp;·&nbsp;<i class="fas fa-map-marker-alt"></i> ${p.endereco}` : ""}
         </div>
         <div class="order-items" style="margin:0.4rem 0;">${itensHtml}</div>
         <div style="display:flex;align-items:center;gap:0.6rem;flex-wrap:wrap;margin-top:0.5rem;">
@@ -388,7 +424,8 @@ function renderTabelaPedidos(pedidos) {
         </div>
       </div>
     `;
-  }).join("");
+    })
+    .join("");
 }
 
 window._adminSetStatus = async (id, novoStatus) => {
@@ -401,10 +438,12 @@ window._adminSetStatus = async (id, novoStatus) => {
 function startRelatorios() {
   const today = new Date();
   const dateInput = document.getElementById("rel-date");
-  const mesInput  = document.getElementById("rel-mes");
+  const mesInput = document.getElementById("rel-mes");
 
-  if (dateInput && !dateInput.value) dateInput.value = today.toISOString().slice(0, 10);
-  if (mesInput  && !mesInput.value)  mesInput.value  = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}`;
+  if (dateInput && !dateInput.value)
+    dateInput.value = today.toISOString().slice(0, 10);
+  if (mesInput && !mesInput.value)
+    mesInput.value = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}`;
 
   carregarRelatorioDia();
   carregarRelatorioMes();
@@ -412,11 +451,13 @@ function startRelatorios() {
 
 export function carregarRelatorioDia() {
   const dateInput = document.getElementById("rel-date");
-  const date = dateInput?.value ? new Date(dateInput.value + "T12:00:00") : new Date();
+  const date = dateInput?.value
+    ? new Date(dateInput.value + "T12:00:00")
+    : new Date();
 
   _unsubPedidos?.();
   _unsubPedidos = watchPedidosDia(date, (pedidos) => {
-    const resumo  = calcularResumo(pedidos);
+    const resumo = calcularResumo(pedidos);
     const ranking = calcularRanking(pedidos);
     renderStatsDia(resumo);
     renderRanking(ranking, "ranking-dia");
@@ -425,14 +466,16 @@ export function carregarRelatorioDia() {
 
 export function carregarRelatorioMes() {
   const mesInput = document.getElementById("rel-mes");
-  const val = mesInput?.value || `${new Date().getFullYear()}-${String(new Date().getMonth()+1).padStart(2,"0")}`;
+  const val =
+    mesInput?.value ||
+    `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, "0")}`;
   const [y, m] = val.split("-").map(Number);
 
   _unsubPedMes?.();
   _unsubPedMes = watchPedidosMes(y, m - 1, (pedidos) => {
     _pedidosMes = pedidos;
-    const resumo  = calcularResumo(pedidos);
-    const diario  = calcularFaturamentoDiario(pedidos);
+    const resumo = calcularResumo(pedidos);
+    const diario = calcularFaturamentoDiario(pedidos);
     const qtdProd = calcularQtdPorProduto(pedidos);
     renderStatsMes(resumo);
     renderGraficoDiario(diario);
@@ -441,37 +484,43 @@ export function carregarRelatorioMes() {
 }
 
 function renderStatsDia(r) {
-  const fmt = (v) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
-  setEl("rel-dia-total",    fmt(r.total));
-  setEl("rel-dia-pedidos",  r.quantidade);
-  setEl("rel-dia-ticket",   fmt(r.ticketMedio));
-  setEl("rel-dia-pix",      fmt(r.porPagamento.pix || 0));
-  setEl("rel-dia-cartao",   fmt(r.porPagamento.cartao || 0));
+  const fmt = (v) =>
+    v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+  setEl("rel-dia-total", fmt(r.total));
+  setEl("rel-dia-pedidos", r.quantidade);
+  setEl("rel-dia-ticket", fmt(r.ticketMedio));
+  setEl("rel-dia-pix", fmt(r.porPagamento.pix || 0));
+  setEl("rel-dia-cartao", fmt(r.porPagamento.cartao || 0));
   setEl("rel-dia-dinheiro", fmt(r.porPagamento.dinheiro || 0));
 }
 
 function renderStatsMes(r) {
-  const fmt = (v) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
-  setEl("rel-mes-total",    fmt(r.total));
-  setEl("rel-mes-pedidos",  r.quantidade);
-  setEl("rel-mes-ticket",   fmt(r.ticketMedio));
+  const fmt = (v) =>
+    v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+  setEl("rel-mes-total", fmt(r.total));
+  setEl("rel-mes-pedidos", r.quantidade);
+  setEl("rel-mes-ticket", fmt(r.ticketMedio));
 }
 
 function renderRanking(ranking, containerId) {
   const container = document.getElementById(containerId);
   if (!container) return;
   if (ranking.length === 0) {
-    container.innerHTML = `<div class="empty-state"><i class="fa fa-trophy"></i><p>Sem dados</p></div>`;
+    container.innerHTML = `<div class="empty-state"><i class="fas fa-trophy"></i><p>Sem dados</p></div>`;
     return;
   }
-  const rows = ranking.map((r, i) => `
+  const rows = ranking
+    .map(
+      (r, i) => `
     <tr>
       <td><span class="rank-num">${i + 1}</span></td>
       <td><span class="rank-name">${r.nome}</span></td>
       <td><span class="rank-count">${r.quantidade}×</span></td>
-      <td><span class="rank-revenue">${r.faturamento.toLocaleString("pt-BR", { style:"currency", currency:"BRL" })}</span></td>
+      <td><span class="rank-revenue">${r.faturamento.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}</span></td>
     </tr>
-  `).join("");
+  `,
+    )
+    .join("");
   container.innerHTML = `
     <table class="ranking-table">
       <thead><tr><th>#</th><th>Item</th><th>Qtd</th><th>Arrecadado</th></tr></thead>
@@ -483,22 +532,27 @@ function renderGraficoDiario(diario) {
   const container = document.getElementById("grafico-diario");
   if (!container) return;
   if (diario.length === 0) {
-    container.innerHTML = `<div class="empty-state"><i class="fa fa-chart-bar"></i><p>Sem dados</p></div>`;
+    container.innerHTML = `<div class="empty-state"><i class="fas fa-chart-bar"></i><p>Sem dados</p></div>`;
     return;
   }
-  const maxVal = Math.max(...diario.map(d => d.total));
-  const bars = diario.map(d => {
-    const pct = maxVal > 0 ? (d.total / maxVal) * 100 : 0;
-    const label = d.total.toLocaleString("pt-BR", { style:"currency", currency:"BRL" });
-    return `
+  const maxVal = Math.max(...diario.map((d) => d.total));
+  const bars = diario
+    .map((d) => {
+      const pct = maxVal > 0 ? (d.total / maxVal) * 100 : 0;
+      const label = d.total.toLocaleString("pt-BR", {
+        style: "currency",
+        currency: "BRL",
+      });
+      return `
       <div class="bar-item">
         <div class="bar-wrap" title="${label}">
           <div class="bar-fill" style="height:${pct}%"></div>
         </div>
         <div class="bar-label">${d.dia}</div>
-        <div class="bar-value">${(d.total/100).toFixed(0) === "0" ? label : label}</div>
+        <div class="bar-value">${(d.total / 100).toFixed(0) === "0" ? label : label}</div>
       </div>`;
-  }).join("");
+    })
+    .join("");
   container.innerHTML = `<div class="bar-chart">${bars}</div>`;
 }
 
@@ -506,14 +560,18 @@ function renderQtdPorProduto(lista) {
   const container = document.getElementById("qtd-por-produto");
   if (!container) return;
   if (lista.length === 0) {
-    container.innerHTML = `<div class="empty-state"><i class="fa fa-box"></i><p>Sem dados</p></div>`;
+    container.innerHTML = `<div class="empty-state"><i class="fas fa-box"></i><p>Sem dados</p></div>`;
     return;
   }
-  const rows = lista.map(r => `
+  const rows = lista
+    .map(
+      (r) => `
     <tr>
       <td class="rank-name">${r.nome}</td>
       <td><span class="rank-count">${r.quantidade}×</span></td>
-    </tr>`).join("");
+    </tr>`,
+    )
+    .join("");
   container.innerHTML = `
     <table class="ranking-table">
       <thead><tr><th>Produto</th><th>Qtd Vendida</th></tr></thead>

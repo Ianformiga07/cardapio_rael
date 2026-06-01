@@ -686,7 +686,6 @@ async function confirmPIXPayment() {
   btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Abrindo WhatsApp...';
   btn.disabled = true;
 
-  // Salvar pedido PIX no Firestore
   await saveOrderToHistory(_pixOrderSnapshot);
 
   const baseText = _pixOrderSnapshot.whatsappText;
@@ -744,9 +743,7 @@ function loadHistory() {
 }
 
 async function saveOrderToHistory(orderData) {
-  // ── Salvar no Firestore ──────────────────────────────────────────────────
   const firestoreId = await salvarPedido(orderData);
-
   if (firestoreId) {
     try {
       localStorage.setItem("pizzaria_ra_last_order_id", firestoreId);
@@ -755,18 +752,15 @@ async function saveOrderToHistory(orderData) {
         orderData.customerName || "",
       );
     } catch (_) {}
-    // Disparar evento para o patch iniciar o rastreamento
     window.dispatchEvent(
       new CustomEvent("pizzaria:pedido_salvo", { detail: { firestoreId } }),
     );
   }
-
-  // ── Cache local leve ─────────────────────────────────────────────────────
   try {
     const CACHE_KEY = "pizzaria_ra_orders_cache";
     const cache = JSON.parse(localStorage.getItem(CACHE_KEY) || "[]");
     cache.unshift({
-      firestoreId: firestoreId,
+      firestoreId,
       id: orderData.id || Date.now(),
       date: orderData.date,
       customerName: orderData.customerName,
@@ -976,7 +970,6 @@ window.addEventListener("storage", (e) => {
 });
 
 // ─── EXPOR FUNÇÕES GLOBAIS (necessário com type="module") ─────────────────────
-// Com type="module" o escopo é isolado; os onclick do HTML precisam de window.*
 window.scrollToSection = scrollToSection;
 window.selectOrderType = selectOrderType;
 window.selectPayment = selectPayment;

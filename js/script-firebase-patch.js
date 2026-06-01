@@ -18,9 +18,6 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 // ─── 1. ESCUTAR EVENTO DO script.js (módulo) ─────────────────────────────────
-// saveOrderToHistory() agora vive no script.js como módulo ES e chama
-// salvarPedido() diretamente. Após salvar, dispara o evento abaixo
-// para que o patch inicie o rastreamento em tempo real.
 window.addEventListener("pizzaria:pedido_salvo", (e) => {
   const { firestoreId } = e.detail || {};
   if (firestoreId) iniciarRastreamentoPedido(firestoreId);
@@ -40,20 +37,33 @@ const _produtoMap = new Map();
 
 function applyEsgotadoFirebase(produtos) {
   _produtoMap.clear();
-  produtos.forEach((p) => _produtoMap.set(p.nome, p));
+  // Index by exact name AND by normalized name (lowercase, trimmed) for resilient matching
+  produtos.forEach((p) => {
+    _produtoMap.set(p.nome, p);
+    _produtoMap.set((p.nome || "").toLowerCase().trim(), p);
+  });
 
   document
     .querySelectorAll(".product-card[data-product-name]")
     .forEach((card) => {
       const nome = card.dataset.productName;
-      const prod = _produtoMap.get(nome);
+      // Try exact match first, then normalized
+      const prod =
+        _produtoMap.get(nome) ||
+        _produtoMap.get((nome || "").toLowerCase().trim());
+
+      // If product not found in Firestore, leave the card as-is (don't hide it)
       if (!prod) return;
 
       const isEsgotado = prod.esgotado === true;
       card.classList.toggle("esgotado", isEsgotado);
 
-      const btn = card.querySelector(".add-td-cart-btn");
-      if (btn) btn.disabled = isEsgotado;
+      // Disable ALL add-to-cart buttons (both class names used in the project)
+      card
+        .querySelectorAll(".add-td-cart-btn, .add-cart-btn")
+        .forEach((btn) => {
+          btn.disabled = isEsgotado;
+        });
     });
 }
 
