@@ -1,0 +1,34 @@
+// Função para atualizar o carrinho
+function updateCartModal() {
+  cartItemsContainer.innerHTML = "";
+  let total = 0;
+  cart.forEach((item, index) => {
+    total += item.price * item.quantity;
+    const itemElement = document.createElement("div");
+    itemElement.classList.add(
+      "flex",
+      "justify-between",
+      "items-center",
+      "mb-2",
+    );
+    itemElement.innerHTML = `
+      <div>
+        <p class="font-bold">${item.name}</p>
+        <p>${item.quantity} x R$ ${item.price.toFixed(2)}</p>
+      </div>
+      <button class="text-red-500" data-index="${index}">&times;</button>
+    `;
+    cartItemsContainer.appendChild(itemElement);
+  });
+  cartTotal.textContent = `Total: R$ ${total.toFixed(2)}`;
+  cartCounter.textContent = cart.reduce((acc, item) => acc + item.quantity, 0);
+}
+
+// Função para remover item do carrinho
+cartItemsContainer.addEventListener("click", (e) => {
+  if (e.target.tagName === "BUTTON") {
+    const index = e.target.getAttribute("data-index");
+    cart.splice(index, 1);
+    updateCartModal();
+  }
+});

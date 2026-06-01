@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Comanda de Produção</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #e5e5e5;
+    font-family: 'Courier New', Courier, monospace;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px 16px 60px;
+    min-height: 100vh;
+  }
+
+  .top-bar {
+    width: 100%;
+    max-width: 400px;
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  .btn-print {
+    flex: 1;
+    background: #ff6b00;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 14px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  .btn-print:hover { background: #e05c00; }
+
+  .btn-close {
+    background: #555;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 14px 18px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .btn-close:hover { background: #333; }
+
+  /* COMANDA — otimizada para impressora térmica 58mm */
+  .cupom {
+    width: 260px;
+    background: #fff;
+    padding: 10px 8px;
+    font-size: 13px;        /* base maior para térmica */
+    line-height: 1.6;
+    color: #000;
+    box-shadow: 0 4px 20px rgba(0,0,0,.18);
+    border-radius: 4px;
+  }
+
+  .cupom .logo {
+    text-align: center;
+    font-size: 18px;
+    font-weight: 900;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 3px;
+  }
+  .cupom .subtitulo {
+    text-align: center;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    background: #000;
+    color: #fff;
+    padding: 3px 4px;
+    margin-bottom: 6px;
+  }
+
+  .cupom .sep {
+    border: none;
+    border-top: 1px dashed #000;
+    margin: 6px 0;
+  }
+  .cupom .sep-solid {
+    border: none;
+    border-top: 2px solid #000;
+    margin: 6px 0;
+  }
+
+  .cupom .row {
+    display: flex;
+    justify-content: space-between;
+    gap: 4px;
+  }
+  .cupom .label { font-weight: 700; }
+  .cupom .center { text-align: center; }
+  .cupom .bold { font-weight: 900; }
+
+  /* NÚMERO DO PEDIDO — destaque máximo */
+  .cupom .pedido-num {
+    font-size: 28px;
+    font-weight: 900;
+    text-align: center;
+    margin: 6px 0 3px;
+    letter-spacing: 2px;
+    border: 3px solid #000;
+    padding: 4px 0;
+  }
+
+  /* ITENS — foco total na cozinha */
+  .cupom .itens-titulo {
+    font-size: 14px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin: 6px 0 4px;
+  }
+  .cupom .item-nome {
+    font-weight: 900;
+    font-size: 15px;       /* nome do item bem grande */
+    margin-top: 7px;
+    background: #000;
+    color: #fff;
+    padding: 4px 6px;
+    border-radius: 2px;
+  }
+  .cupom .item-detalhe {
+    padding-left: 10px;
+    font-size: 13px;
+    color: #000;
+    font-weight: 700;
+    margin-top: 2px;
+  }
+  .cupom .item-obs {
+    padding-left: 10px;
+    font-size: 13px;
+    font-weight: 900;
+    color: #000;
+    border-left: 3px solid #000;
+    margin: 3px 0 3px 10px;
+  }
+
+  /* TIPO DE ENTREGA */
+  .cupom .entrega-box {
+    border: 3px solid #000;
+    padding: 6px 8px;
+    margin: 8px 0 6px;
+    font-weight: 900;
+    font-size: 15px;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  /* CLIENTE (rodapé discreto) */
+  .cupom .cliente-box {
+    font-size: 12px;
+    margin-top: 6px;
+    padding-top: 4px;
+    border-top: 1px dashed #000;
+    color: #333;
+    text-align: center;
+  }
+
+  /* erro */
+  #error-box {
+    background: #fff;
+    border-radius: 12px;
+    padding: 32px 24px;
+    max-width: 360px;
+    text-align: center;
+    box-shadow: 0 4px 20px rgba(0,0,0,.15);
+  }
+  #error-box h2 { color: #e53e3e; margin-bottom: 12px; }
+
+  /* IMPRESSÃO — térmica 58mm */
+  @media print {
+    body { background: #fff; padding: 0; display: block; }
+    .top-bar { display: none; }
+    .cupom {
+      width: 100%;
+      box-shadow: none;
+      border-radius: 0;
+      font-size: 13px;
+      padding: 4px 3px;
+    }
+    @page {
+      size: 58mm auto;
+      margin: 1mm 2mm;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div id="app"></div>
+
+<script>
+(function() {
+  const app = document.getElementById('app');
+
+  /* 1. Pegar dados da URL */
+  const params = new URLSearchParams(window.location.search);
+  const raw    = params.get('d');
+
+  if (!raw) {
+    app.innerHTML = `<div id="error-box">
+      <h2>⚠️ Link inválido</h2>
+      <p>Este link não contém dados do pedido.<br>Solicite um novo link ao fazer o pedido.</p>
+    </div>`;
+    return;
+  }
+
+  let order;
+  try {
+    order = JSON.parse(decodeURIComponent(atob(raw)));
+  } catch(e) {
+    app.innerHTML = `<div id="error-box">
+      <h2>⚠️ Erro ao ler pedido</h2>
+      <p>Os dados do link estão corrompidos.</p>
+    </div>`;
+    return;
+  }
+
+  /* 2. Helpers */
+  function dateStr(iso) {
+    try { return new Date(iso).toLocaleString('pt-BR'); } catch(e) { return iso; }
+  }
+
+  /* 3. Montar itens — apenas para produção (sem preços) */
+  let itensHTML = '';
+  order.items.forEach(item => {
+    itensHTML += `<div class="item-nome">${item.quantity}× ${item.name}</div>`;
+
+    if (item.secondFlavor)
+      itensHTML += `<div class="item-detalhe">🍕 Metade: ${item.secondFlavor}</div>`;
+
+    if (item.extras && item.extras.length > 0) {
+      item.extras.forEach(e => {
+        const el = typeof e === 'object' ? e.label : e;
+        itensHTML += `<div class="item-detalhe">➕ ${el}</div>`;
+      });
+    }
+
+    if (item.obs)
+      itensHTML += `<div class="item-obs">💬 ${item.obs}</div>`;
+  });
+
+  /* 4. Tipo de entrega (apenas delivery ou retirada — sem endereço) */
+  const orderLabels = { delivery: '🛵 DELIVERY', retirada: '🏪 RETIRADA' };
+  const tipoEntrega = orderLabels[order.orderType] || order.orderType.toUpperCase();
+
+  /* 5. Número do pedido */
+  const numPedido = String(order.id || Date.now()).slice(-4);
+
+  /* 6. Comanda HTML — foco total na cozinha */
+  const cupomHTML = `
+    <div class="cupom" id="cupom">
+      <div class="logo">🍕 Pizzaria RA</div>
+      <div class="subtitulo">— comanda de produção —</div>
+
+      <div class="pedido-num">#${numPedido}</div>
+
+      <hr class="sep-solid">
+
+      <div class="itens-titulo">📋 Itens a Preparar:</div>
+      ${itensHTML}
+
+      <hr class="sep">
+
+      <div class="entrega-box">${tipoEntrega}</div>
+
+      <div class="cliente-box">
+        ${order.customerName} | ${order.customerPhone}
+      </div>
+    </div>`;
+
+  /* 8. Renderizar */
+  app.innerHTML = `
+    <div class="top-bar">
+      <button class="btn-print" onclick="window.print()">🖨️ Imprimir Comanda</button>
+      <button class="btn-close" onclick="window.close()">✕ Fechar</button>
+    </div>
+    ${cupomHTML}`;
+
+  /* 9. Auto print se veio com ?print=1 */
+  if (params.get('print') === '1') {
+    window.addEventListener('load', () => setTimeout(() => window.print(), 600));
+  }
+})();
+</script>
+</body>
+</html>

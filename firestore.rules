@@ -1,0 +1,48 @@
+// ============================================================
+// firestore.rules
+// Regras de segurança do Cloud Firestore
+//
+// Deploy: firebase deploy --only firestore:rules
+// Ou cole diretamente no Firebase Console →
+//   Firestore Database → Rules
+// ============================================================
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ─── FUNÇÕES AUXILIARES ───────────────────────────────────────
+    function isAuthed() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isAuthed() &&
+        get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data.perfil == "admin";
+    }
+
+    // ─── COLEÇÃO: produtos ────────────────────────────────────────
+    // Leitura pública (cardápio visível para todos)
+    // Escrita apenas para admins autenticados
+    match /produtos/{produtoId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // ─── COLEÇÃO: pedidos ─────────────────────────────────────────
+    // Criação: qualquer um (cliente finaliza pedido sem conta)
+    // Leitura/edição: apenas admins
+    match /pedidos/{pedidoId} {
+      allow create: if true;
+      allow read, update, delete: if isAdmin();
+    }
+
+    // ─── COLEÇÃO: usuarios ────────────────────────────────────────
+    // Leitura do próprio perfil ou admin lê qualquer perfil
+    // Escrita apenas para admins (cadastro via console/seed)
+    match /usuarios/{uid} {
+      allow read: if isAuthed() && (request.auth.uid == uid || isAdmin());
+      allow write: if isAdmin();
+    }
+  }
+}

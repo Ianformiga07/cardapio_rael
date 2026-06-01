@@ -1,0 +1,2788 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+      integrity="sha512-Fo3rlrZj/k7ujTnHg4CGR2D7kSs0v4LLanw2qksYuRlEzO+tcaEPQogQ0KaoGN26/zrn20ImR1DfuLWnOo7aBA=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Nunito:ital,wght@0,400;0,600;0,700;0,800;1,400&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles/output.css" />
+    <link rel="icon" type="image/png" href="assets/logo1.png" />
+    <title>Pizzaria RA - Pizza, Hambúrguer e mais</title>
+    <style>
+      :root {
+        --red: #c8102e;
+        --red-dark: #9b0d22;
+        --red-light: #f5c6cc;
+        --amber: #f59e0b;
+        --dark: #1a1a1a;
+        --surface: #fff;
+        --surface2: #fafafa;
+        --border: #e8e8e8;
+        --text: #1a1a1a;
+        --text-muted: #6b7280;
+        --green: #16a34a;
+        --green-dark: #15803d;
+      }
+
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Nunito", sans-serif;
+        background: #f5f5f0;
+        color: var(--text);
+        margin: 0;
+        padding: 0;
+      }
+
+      /* ─── HEADER ─── */
+      .site-header {
+        background: linear-gradient(
+          160deg,
+          #1a1a1a 0%,
+          #2d0a10 50%,
+          #c8102e 100%
+        );
+        padding: 0;
+        position: relative;
+        overflow: hidden;
+      }
+      .site-header::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background:
+          radial-gradient(
+            circle at 70% 50%,
+            rgba(200, 16, 46, 0.35) 0%,
+            transparent 60%
+          ),
+          radial-gradient(
+            circle at 10% 80%,
+            rgba(245, 158, 11, 0.2) 0%,
+            transparent 40%
+          );
+      }
+      .header-inner {
+        position: relative;
+        z-index: 2;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 3rem 1.5rem 2.5rem;
+        text-align: center;
+      }
+      .logo-circle {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        border: 4px solid var(--amber);
+        overflow: hidden;
+        box-shadow:
+          0 0 0 6px rgba(245, 158, 11, 0.2),
+          0 20px 40px rgba(0, 0, 0, 0.5);
+        margin-bottom: 1.25rem;
+        transition: transform 0.3s ease;
+      }
+      .logo-circle:hover {
+        transform: scale(1.07) rotate(-2deg);
+      }
+      .logo-circle img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+      .header-title {
+        font-family: "Oswald", sans-serif;
+        font-size: 2.8rem;
+        font-weight: 700;
+        color: #fff;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        line-height: 1;
+        margin-bottom: 0.4rem;
+      }
+      .header-title span {
+        color: var(--amber);
+      }
+      .header-subtitle {
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 0.9rem;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        margin-bottom: 1.25rem;
+      }
+      .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.4rem 1rem;
+        border-radius: 999px;
+        font-size: 0.8rem;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+      }
+      .status-badge.open {
+        background: var(--green);
+        color: #fff;
+      }
+      .status-badge.closed {
+        background: #dc2626;
+        color: #fff;
+      }
+      .status-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: currentColor;
+        opacity: 0.8;
+        animation: pulse 1.5s infinite;
+      }
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 0.8;
+          transform: scale(1);
+        }
+        50% {
+          opacity: 0.4;
+          transform: scale(1.3);
+        }
+      }
+
+      /* ─── CATEGORY NAV ─── */
+      .cat-nav {
+        background: var(--surface);
+        position: sticky;
+        top: 0;
+        z-index: 30;
+        border-bottom: 2px solid var(--border);
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+      }
+      .cat-nav-inner {
+        display: flex;
+        gap: 0;
+        max-width: 900px;
+        margin: 0 auto;
+        overflow-x: auto;
+        scrollbar-width: none;
+      }
+      .cat-nav-inner::-webkit-scrollbar {
+        display: none;
+      }
+      .cat-tab {
+        flex-shrink: 0;
+        padding: 0.9rem 1.25rem;
+        border: none;
+        background: none;
+        cursor: pointer;
+        font-family: "Nunito", sans-serif;
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: var(--text-muted);
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        border-bottom: 3px solid transparent;
+        transition: all 0.2s;
+        white-space: nowrap;
+      }
+      .cat-tab:hover {
+        color: var(--red);
+      }
+      .cat-tab.active {
+        color: var(--red);
+        border-bottom-color: var(--red);
+      }
+
+      /* ─── MENU SECTIONS ─── */
+      .menu-section {
+        padding: 2rem 1rem 1rem;
+        max-width: 900px;
+        margin: 0 auto;
+      }
+      .section-header {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 1.5rem;
+      }
+      .section-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        background: var(--red);
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+        flex-shrink: 0;
+      }
+      .section-title {
+        font-family: "Oswald", sans-serif;
+        font-size: 1.6rem;
+        font-weight: 600;
+        color: var(--dark);
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        margin: 0;
+      }
+      .section-divider {
+        flex: 1;
+        height: 2px;
+        background: linear-gradient(to right, var(--red), transparent);
+        border: none;
+        margin: 0;
+      }
+
+      /* ─── PRODUCT CARD ─── */
+      .products-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1rem;
+      }
+      @media (min-width: 640px) {
+        .products-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+
+      .product-card {
+        background: var(--surface);
+        border-radius: 16px;
+        border: 1px solid var(--border);
+        display: flex;
+        gap: 0.9rem;
+        padding: 0.9rem;
+        transition:
+          box-shadow 0.2s,
+          transform 0.2s;
+        overflow: hidden;
+      }
+      .product-card:hover {
+        box-shadow: 0 8px 24px rgba(200, 16, 46, 0.12);
+        transform: translateY(-2px);
+      }
+
+      /* ─── ESGOTADO ─── */
+      .product-card.esgotado {
+        opacity: 0.7;
+        pointer-events: none;
+      }
+      .product-card.esgotado:hover {
+        box-shadow: none;
+        transform: none;
+      }
+      .product-img-wrap {
+        position: relative;
+        flex-shrink: 0;
+        width: 100px;
+        height: 100px;
+      }
+      .esgotado-overlay {
+        display: none;
+        position: absolute;
+        inset: 0;
+        border-radius: 12px;
+        background: rgba(0,0,0,0.62);
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        gap: 2px;
+        z-index: 2;
+      }
+      .product-card.esgotado .esgotado-overlay {
+        display: flex;
+      }
+      .esgotado-overlay span {
+        color: #fff;
+        font-family: "Oswald", sans-serif;
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        background: #dc2626;
+        padding: 0.18rem 0.5rem;
+        border-radius: 4px;
+        line-height: 1.3;
+      }
+      .esgotado-overlay i {
+        color: #fff;
+        font-size: 1.4rem;
+        margin-bottom: 2px;
+      }
+      .product-card.esgotado .add-cart-btn {
+        background: #9ca3af !important;
+        cursor: not-allowed;
+      }
+      .esgotado-badge {
+        display: none;
+        background: #dc2626;
+        color: #fff;
+        font-size: 0.68rem;
+        font-weight: 800;
+        padding: 0.12rem 0.45rem;
+        border-radius: 4px;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        margin-left: 0.35rem;
+        vertical-align: middle;
+      }
+      .product-card.esgotado .esgotado-badge {
+        display: inline-block;
+      }
+
+      .product-img {
+        width: 100px;
+        height: 100px;
+        border-radius: 12px;
+        object-fit: cover;
+        flex-shrink: 0;
+        transition: transform 0.3s;
+      }
+      .product-card:hover .product-img {
+        transform: scale(1.05) rotate(-1deg);
+      }
+      .product-body {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+      }
+      .product-name {
+        font-family: "Oswald", sans-serif;
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--dark);
+        letter-spacing: 0.3px;
+        margin-bottom: 0.3rem;
+        text-transform: uppercase;
+      }
+      .product-desc {
+        font-size: 0.8rem;
+        color: var(--text-muted);
+        line-height: 1.4;
+        flex: 1;
+        margin-bottom: 0.6rem;
+      }
+      .product-footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-top: auto;
+      }
+      .product-price {
+        font-family: "Oswald", sans-serif;
+        font-size: 1.15rem;
+        font-weight: 700;
+        color: var(--red);
+      }
+      .add-cart-btn {
+        width: 38px;
+        height: 38px;
+        border-radius: 10px;
+        background: var(--dark);
+        border: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-size: 1rem;
+        transition:
+          background 0.15s,
+          transform 0.1s;
+      }
+      .add-cart-btn:hover {
+        background: var(--red);
+        transform: scale(1.1);
+      }
+      .add-cart-btn:active {
+        transform: scale(0.95);
+      }
+
+      /* ─── PIZZA BADGE ─── */
+      .badge-new {
+        display: inline-block;
+        background: var(--amber);
+        color: var(--dark);
+        font-size: 0.65rem;
+        font-weight: 800;
+        padding: 0.1rem 0.4rem;
+        border-radius: 4px;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        margin-left: 0.4rem;
+        vertical-align: middle;
+      }
+
+      /* ─── FOOTER CART ─── */
+      .cart-footer {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        z-index: 40;
+        padding: 0.75rem 1rem;
+        background: linear-gradient(to right, var(--dark), #2d0a10);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .cart-footer-btn {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        background: var(--red);
+        border: none;
+        cursor: pointer;
+        padding: 0.65rem 1.5rem;
+        border-radius: 999px;
+        color: #fff;
+        font-family: "Nunito", sans-serif;
+        font-size: 0.9rem;
+        font-weight: 800;
+        transition:
+          background 0.2s,
+          transform 0.15s;
+        box-shadow: 0 4px 16px rgba(200, 16, 46, 0.4);
+      }
+      .cart-footer-btn:hover {
+        background: var(--red-dark);
+        transform: scale(1.03);
+      }
+      .cart-badge {
+        background: #fff;
+        color: var(--red);
+        border-radius: 999px;
+        width: 22px;
+        height: 22px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.75rem;
+        font-weight: 900;
+      }
+
+      /* ─── MODAL ─── */
+      .modal-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.65);
+        z-index: 99;
+        align-items: flex-end;
+        justify-content: center;
+        padding: 0;
+      }
+      @media (min-width: 640px) {
+        .modal-overlay {
+          align-items: center;
+          padding: 1rem;
+        }
+      }
+      .modal-overlay.active {
+        display: flex;
+      }
+      .modal-box {
+        background: var(--surface);
+        width: 100%;
+        max-width: 560px;
+        max-height: 92vh;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        border-radius: 20px 20px 0 0;
+        box-shadow: 0 -8px 40px rgba(0, 0, 0, 0.2);
+      }
+      @media (min-width: 640px) {
+        .modal-box {
+          border-radius: 20px;
+          box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+      }
+      .modal-handle {
+        width: 40px;
+        height: 4px;
+        background: var(--border);
+        border-radius: 2px;
+        margin: 0.75rem auto 0;
+      }
+      @media (min-width: 640px) {
+        .modal-handle {
+          display: none;
+        }
+      }
+      .modal-header {
+        padding: 1rem 1.25rem 0.875rem;
+        border-bottom: 1px solid var(--border);
+        flex-shrink: 0;
+      }
+      .modal-header-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .modal-title {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-family: "Oswald", sans-serif;
+        font-size: 1.25rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin: 0;
+      }
+      .modal-close {
+        background: var(--border);
+        border: none;
+        cursor: pointer;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--text-muted);
+        font-size: 0.9rem;
+        transition: background 0.15s;
+      }
+      .modal-close:hover {
+        background: #e5e7eb;
+        color: var(--dark);
+      }
+      .modal-body {
+        flex: 1;
+        overflow-y: auto;
+        padding: 1rem 1.25rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+      }
+      .modal-footer {
+        padding: 0.875rem 1.25rem;
+        border-top: 1px solid var(--border);
+        flex-shrink: 0;
+        background: var(--surface2);
+      }
+
+      /* ─── CART ITEMS ─── */
+      .cart-item-card {
+        background: var(--surface2);
+        border-radius: 12px;
+        padding: 0.75rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        border: 1px solid var(--border);
+        gap: 0.75rem;
+      }
+      .cart-item-info {
+        flex: 1;
+        min-width: 0;
+      }
+      .cart-item-name {
+        font-weight: 800;
+        font-size: 0.875rem;
+        color: var(--dark);
+        margin-bottom: 0.15rem;
+      }
+      .cart-item-unit {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+      }
+      .cart-item-obs {
+        font-size: 0.72rem;
+        color: #6b7280;
+        margin-top: 0.2rem;
+        font-style: italic;
+        white-space: pre-wrap;
+        word-break: break-word;
+      }
+      .cart-item-extras {
+        font-size: 0.72rem;
+        color: var(--green);
+        margin-top: 0.15rem;
+        font-weight: 600;
+      }
+      .cart-item-controls {
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+        flex-shrink: 0;
+      }
+      .qty-btn {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        border: 2px solid var(--dark);
+        background: transparent;
+        font-size: 1rem;
+        font-weight: 700;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--dark);
+        transition: all 0.15s;
+        line-height: 1;
+      }
+      .qty-btn:hover {
+        background: var(--dark);
+        color: #fff;
+      }
+      .qty-num {
+        font-weight: 800;
+        min-width: 1.5rem;
+        text-align: center;
+        font-size: 0.9rem;
+      }
+      .cart-item-price {
+        font-weight: 800;
+        font-size: 0.875rem;
+        color: var(--red);
+        min-width: 4rem;
+        text-align: right;
+        padding-top: 0.1rem;
+      }
+      .empty-cart {
+        text-align: center;
+        padding: 2.5rem 1rem;
+        color: var(--text-muted);
+      }
+      .empty-cart i {
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+        display: block;
+        opacity: 0.4;
+      }
+
+      /* ─── SECTIONS IN MODAL ─── */
+      .form-section {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+      .form-label {
+        font-weight: 800;
+        font-size: 0.8rem;
+        color: var(--dark);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+      }
+      .btn-group {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+      }
+      .option-btn {
+        flex: 1;
+        min-width: 80px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.4rem;
+        padding: 0.55rem 0.75rem;
+        border: 2px solid var(--border);
+        border-radius: 10px;
+        cursor: pointer;
+        font-family: "Nunito", sans-serif;
+        font-size: 0.8rem;
+        font-weight: 700;
+        background: var(--surface);
+        color: var(--text-muted);
+        transition: all 0.15s;
+        white-space: nowrap;
+      }
+      .option-btn:hover {
+        border-color: var(--dark);
+        color: var(--dark);
+      }
+      .option-btn.selected-order {
+        border-color: var(--green);
+        background: var(--green);
+        color: #fff;
+      }
+      .option-btn.selected-pay {
+        border-color: var(--dark);
+        background: var(--dark);
+        color: #fff;
+      }
+
+      .form-input {
+        width: 100%;
+        border: 2px solid var(--border);
+        border-radius: 10px;
+        padding: 0.6rem 0.875rem;
+        font-family: "Nunito", sans-serif;
+        font-size: 0.875rem;
+        font-weight: 600;
+        outline: none;
+        transition: border-color 0.15s;
+        background: var(--surface);
+        color: var(--dark);
+      }
+      .form-input:focus {
+        border-color: var(--dark);
+      }
+      .form-input.input-error {
+        border-color: #dc2626 !important;
+      }
+      .form-textarea {
+        resize: vertical;
+        min-height: 60px;
+        font-family: "Nunito", sans-serif;
+        font-size: 0.875rem;
+        font-weight: 600;
+        border: 2px solid var(--border);
+        border-radius: 10px;
+        padding: 0.6rem 0.875rem;
+        width: 100%;
+        outline: none;
+        transition: border-color 0.15s;
+        color: var(--dark);
+      }
+      .form-textarea:focus {
+        border-color: var(--dark);
+      }
+      .form-warn {
+        color: #dc2626;
+        font-size: 0.75rem;
+        margin-top: 0.2rem;
+        display: none;
+      }
+      .form-info {
+        font-size: 0.75rem;
+        color: var(--green);
+        margin-top: 0.2rem;
+        display: none;
+      }
+
+      /* ─── TOTAL BAR ─── */
+      .total-row {
+        background: var(--surface);
+        border: 1.5px solid var(--border);
+        border-radius: 12px;
+        padding: 0.75rem 1rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.75rem;
+      }
+      .total-label {
+        font-weight: 700;
+        font-size: 0.9rem;
+        color: var(--dark);
+      }
+      .total-value {
+        font-family: "Oswald", sans-serif;
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: var(--red);
+      }
+      .checkout-btn {
+        width: 100%;
+        padding: 0.85rem;
+        background: var(--green);
+        color: #fff;
+        border: none;
+        border-radius: 12px;
+        font-family: "Nunito", sans-serif;
+        font-size: 1rem;
+        font-weight: 800;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        transition:
+          background 0.15s,
+          transform 0.1s;
+      }
+      .checkout-btn:hover {
+        background: var(--green-dark);
+      }
+      .checkout-btn:active {
+        transform: scale(0.98);
+      }
+
+      /* ─── ADICIONAIS MODAL ─── */
+      .extras-modal-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.65);
+        z-index: 110;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+      }
+      .extras-modal-overlay.active {
+        display: flex;
+      }
+      .extras-modal-box {
+        background: var(--surface);
+        width: 100%;
+        max-width: 480px;
+        border-radius: 20px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        overflow: hidden;
+        max-height: 90vh;
+        display: flex;
+        flex-direction: column;
+      }
+      .extras-header {
+        padding: 1.25rem 1.5rem;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-shrink: 0;
+      }
+      .extras-header h3 {
+        font-family: "Oswald", sans-serif;
+        font-size: 1.1rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        margin: 0;
+        letter-spacing: 0.5px;
+      }
+      .extras-body {
+        padding: 1.25rem 1.5rem;
+        overflow-y: auto;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+      }
+      .extras-product-name {
+        font-weight: 800;
+        color: var(--red);
+        font-size: 1rem;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+        margin-bottom: 0.25rem;
+      }
+      .extras-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.5rem;
+      }
+      .extra-chip {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.5rem 0.75rem;
+        border: 2px solid var(--border);
+        border-radius: 10px;
+        cursor: pointer;
+        font-size: 0.82rem;
+        font-weight: 700;
+        transition: all 0.15s;
+        background: var(--surface);
+        color: var(--text-muted);
+        user-select: none;
+      }
+      .extra-chip:hover {
+        border-color: var(--amber);
+        color: var(--dark);
+      }
+      .extra-chip.selected {
+        border-color: var(--amber);
+        background: #fffbeb;
+        color: var(--dark);
+      }
+      .extra-chip-check {
+        width: 16px;
+        height: 16px;
+        border-radius: 4px;
+        border: 2px solid var(--border);
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.6rem;
+        transition: all 0.15s;
+      }
+      .extra-chip.selected .extra-chip-check {
+        background: var(--amber);
+        border-color: var(--amber);
+        color: var(--dark);
+      }
+      .extras-obs-label {
+        font-size: 0.8rem;
+        font-weight: 800;
+        color: var(--dark);
+        margin-bottom: 0.3rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+      .extras-footer {
+        padding: 1rem 1.5rem;
+        border-top: 1px solid var(--border);
+        display: flex;
+        gap: 0.75rem;
+        flex-shrink: 0;
+      }
+      .btn-cancel {
+        flex: 1;
+        padding: 0.7rem;
+        border: 2px solid var(--border);
+        border-radius: 10px;
+        background: none;
+        font-family: "Nunito", sans-serif;
+        font-size: 0.9rem;
+        font-weight: 700;
+        cursor: pointer;
+        color: var(--text-muted);
+        transition: all 0.15s;
+      }
+      .btn-cancel:hover {
+        border-color: var(--dark);
+        color: var(--dark);
+      }
+      .btn-confirm {
+        flex: 2;
+        padding: 0.7rem;
+        border: none;
+        border-radius: 10px;
+        background: var(--red);
+        font-family: "Nunito", sans-serif;
+        font-size: 0.9rem;
+        font-weight: 800;
+        cursor: pointer;
+        color: #fff;
+        transition: background 0.15s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.4rem;
+      }
+      .btn-confirm:hover {
+        background: var(--red-dark);
+      }
+
+      /* ─── PAGE BOTTOM SPACING ─── */
+      #page-bottom {
+        height: 80px;
+      }
+
+      /* ─── BOTÃO MEUS PEDIDOS NO HEADER ─── */
+      .history-header-btn {
+        margin-top: 1rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.45rem 1.1rem;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.12);
+        border: 1.5px solid rgba(255, 255, 255, 0.3);
+        color: #fff;
+        font-family: "Nunito", sans-serif;
+        font-size: 0.82rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition:
+          background 0.2s,
+          border-color 0.2s;
+        letter-spacing: 0.3px;
+      }
+      .history-header-btn:hover {
+        background: rgba(255, 255, 255, 0.22);
+        border-color: rgba(255, 255, 255, 0.5);
+      }
+
+      /* ─── HISTÓRICO MODAL ─── */
+      .history-modal-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.65);
+        z-index: 200;
+        align-items: flex-end;
+        justify-content: center;
+        padding: 0;
+      }
+      @media (min-width: 640px) {
+        .history-modal-overlay {
+          align-items: center;
+          padding: 1rem;
+        }
+      }
+      .history-modal-overlay.active {
+        display: flex;
+      }
+      .history-modal-box {
+        background: var(--surface);
+        width: 100%;
+        max-width: 560px;
+        max-height: 88vh;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        border-radius: 20px 20px 0 0;
+        box-shadow: 0 -8px 40px rgba(0, 0, 0, 0.2);
+      }
+      @media (min-width: 640px) {
+        .history-modal-box {
+          border-radius: 20px;
+          box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+      }
+      .history-modal-body {
+        flex: 1;
+        overflow-y: auto;
+        padding: 1rem 1.25rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+      }
+      .history-empty {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 3rem 1rem;
+        color: var(--text-muted);
+        gap: 0.75rem;
+        text-align: center;
+      }
+      .history-empty i {
+        font-size: 2.5rem;
+        opacity: 0.3;
+      }
+      .history-card {
+        background: var(--surface2);
+        border: 1.5px solid var(--border);
+        border-radius: 14px;
+        overflow: hidden;
+      }
+      .history-card-header {
+        background: linear-gradient(90deg, #1a1a1a 0%, #2d0a10 100%);
+        color: #fff;
+        padding: 0.65rem 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.5rem;
+      }
+      .history-card-date {
+        font-size: 0.75rem;
+        opacity: 0.75;
+        font-weight: 600;
+      }
+      .history-card-total {
+        font-family: "Oswald", sans-serif;
+        font-size: 1.05rem;
+        font-weight: 700;
+        color: var(--amber);
+        white-space: nowrap;
+      }
+      .history-card-body {
+        padding: 0.75rem 1rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
+      }
+      .history-customer-line {
+        font-size: 0.8rem;
+        font-weight: 800;
+        color: var(--dark);
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        margin-bottom: 0.25rem;
+      }
+      .history-item-line {
+        font-size: 0.8rem;
+        color: var(--text-muted);
+        display: flex;
+        align-items: flex-start;
+        gap: 0.4rem;
+        line-height: 1.4;
+      }
+      .history-item-line i {
+        color: var(--red);
+        font-size: 0.65rem;
+        margin-top: 0.2rem;
+        flex-shrink: 0;
+      }
+      .history-badge-row {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        flex-wrap: wrap;
+        margin-top: 0.3rem;
+        padding-top: 0.5rem;
+        border-top: 1px solid var(--border);
+      }
+      .history-badge {
+        font-size: 0.7rem;
+        font-weight: 700;
+        padding: 0.2rem 0.55rem;
+        border-radius: 999px;
+        background: var(--red-light);
+        color: var(--red-dark);
+      }
+      .history-badge.pix {
+        background: #d1faf5;
+        color: #00786a;
+      }
+      .history-badge.cartao {
+        background: #dbeafe;
+        color: #1d4ed8;
+      }
+      .history-badge.dinheiro {
+        background: #dcfce7;
+        color: #15803d;
+      }
+      .history-clear-btn {
+        width: 100%;
+        padding: 0.65rem;
+        background: transparent;
+        color: #dc2626;
+        border: 1.5px solid #fca5a5;
+        border-radius: 12px;
+        font-family: "Nunito", sans-serif;
+        font-size: 0.875rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition:
+          border-color 0.15s,
+          background 0.15s;
+        margin-top: 0.5rem;
+      }
+      .history-clear-btn:hover {
+        background: #fef2f2;
+        border-color: #dc2626;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ═══ HEADER ═══ -->
+    <header class="site-header">
+      <div class="header-inner">
+        <div class="logo-circle">
+          <img src="assets/logo1.png" alt="Pizzaria RA" />
+        </div>
+        <h1 class="header-title">Pizzaria do <span>RAEL</span></h1>
+        <p class="header-subtitle">
+          <i class="fa fa-map-marker-alt"></i>
+          Praça da Matriz - Centro - Ananás/TO
+        </p>
+        <div class="status-badge" id="date-span">
+          <span class="status-dot"></span>
+          <span>Ter à Dom — 18:00 às 23:00</span>
+        </div>
+        <button class="history-header-btn" onclick="openHistoryModal()">
+          <i class="fa fa-history"></i> Meus Pedidos
+        </button>
+      </div>
+    </header>
+
+    <!-- ═══ CATEGORY NAV ═══ -->
+    <nav class="cat-nav">
+      <div class="cat-nav-inner">
+        <button
+          class="cat-tab active"
+          onclick="scrollToSection('section-pizzas')"
+        >
+          <i class="fa fa-fire"></i> Pizzas
+        </button>
+        <button class="cat-tab" onclick="scrollToSection('section-lanches')">
+          <i class="fa fa-hamburger"></i> Lanches
+        </button>
+        <button class="cat-tab" onclick="scrollToSection('section-bebidas')">
+          <i class="fa fa-glass-cheers"></i> Bebidas
+        </button>
+      </div>
+    </nav>
+
+    <!-- ═══ MENU ═══ -->
+    <div id="menu">
+      <!-- ─── PIZZAS ─── -->
+      <section class="menu-section" id="section-pizzas">
+        <div class="section-header">
+          <div class="section-icon"><i class="fa fa-fire"></i></div>
+          <h2 class="section-title">Pizzas</h2>
+          <hr class="section-divider" />
+        </div>
+
+        <!-- Tabela de tamanhos -->
+        <div
+          style="
+            background: #fff8f0;
+            border: 2px solid var(--amber);
+            border-radius: 14px;
+            padding: 0.85rem 1.1rem;
+            margin-bottom: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+          "
+        >
+          <span
+            style="
+              font-family: &quot;Oswald&quot;, sans-serif;
+              font-weight: 700;
+              font-size: 0.9rem;
+              color: var(--dark);
+              text-transform: uppercase;
+              letter-spacing: 0.5px;
+            "
+            ><i
+              class="fa fa-ruler-combined"
+              style="color: var(--amber); margin-right: 0.35rem"
+            ></i
+            >Tamanhos</span
+          >
+          <span
+            style="
+              font-size: 0.82rem;
+              font-weight: 700;
+              background: var(--amber);
+              color: var(--dark);
+              border-radius: 8px;
+              padding: 0.25rem 0.7rem;
+            "
+            >P — R$ 30,00</span
+          >
+          <span
+            style="
+              font-size: 0.82rem;
+              font-weight: 700;
+              background: var(--amber);
+              color: var(--dark);
+              border-radius: 8px;
+              padding: 0.25rem 0.7rem;
+            "
+            >M — R$ 40,00</span
+          >
+          <span
+            style="
+              font-size: 0.82rem;
+              font-weight: 700;
+              background: var(--amber);
+              color: var(--dark);
+              border-radius: 8px;
+              padding: 0.25rem 0.7rem;
+            "
+            >G — R$ 45,00 / R$ 47,00</span
+          >
+        </div>
+
+        <div class="products-grid">
+          <div class="product-card" data-product-name="Pizza Moda da Casa">
+            <div class="product-img-wrap"><div class="esgotado-overlay"><i class="fa fa-ban"></i><span>Esgotado</span></div><img
+              src="assets/moda.jpeg"
+              alt="Moda da Casa"
+              class="product-img"
+            /></div>
+            <div class="product-body">
+              <p class="product-name">
+                Moda da Casa <span class="badge-new">Popular</span>
+              <span class="esgotado-badge">Esgotado</span></p>
+              <p class="product-desc">
+                Molho, Presunto, Mussarela, Azeitona, Orégano, Bacon, Calabresa,
+                Milho e Tomate
+              </p>
+              <div class="product-footer">
+                <span class="product-price">A partir R$ 30,00</span>
+                <button
+                  class="add-cart-btn add-td-cart-btn"
+                  data-name="Pizza Moda da Casa"
+                  data-price="33.00"
+                  data-has-extras="true"
+                  data-is-pizza="true"
+                  data-prices='{"P":33,"M":43,"G":48}'
+                  title="Adicionar"
+                >
+                  <i class="fa fa-cart-plus"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="product-card" data-product-name="Pizza Calabresa">
+            <div class="product-img-wrap"><div class="esgotado-overlay"><i class="fa fa-ban"></i><span>Esgotado</span></div><img
+              src="assets/calabresa.jpeg"
+              alt="Calabresa"
+              class="product-img"
+            /></div>
+            <div class="product-body">
+              <p class="product-name">Calabresa<span class="esgotado-badge">Esgotado</span></p>
+              <p class="product-desc">
+                Molho, Presunto, Mussarela, Calabresa, Tomate, Milho, Azeitona e
+                Orégano
+              </p>
+              <div class="product-footer">
+                <span class="product-price">A partir R$ 30,00</span>
+                <button
+                  class="add-cart-btn add-td-cart-btn"
+                  data-name="Pizza Calabresa"
+                  data-price="33.00"
+                  data-has-extras="true"
+                  data-is-pizza="true"
+                  data-prices='{"P":33,"M":43,"G":48}'
+                  title="Adicionar"
+                >
+                  <i class="fa fa-cart-plus"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="product-card" data-product-name="Pizza Calabresa c/ Barbecue">
+            <div class="product-img-wrap"><div class="esgotado-overlay"><i class="fa fa-ban"></i><span>Esgotado</span></div><img
+              src="assets/img-02.jpg"
+              alt="Calabresa c/ Barbecue"
+              class="product-img"
+            /></div>
+            <div class="product-body">
+              <p class="product-name">Calabresa c/ Barbecue<span class="esgotado-badge">Esgotado</span></p>
+              <p class="product-desc">
+                Molho, Presunto, Mussarela, Calabresa, Barbecue, Cebola, Tomate,
+                Milho, Azeitona e Orégano
+              </p>
+              <div class="product-footer">
+                <span class="product-price">A partir R$ 30,00</span>
+                <button
+                  class="add-cart-btn add-td-cart-btn"
+                  data-name="Pizza Calabresa c/ Barbecue"
+                  data-price="34.00"
+                  data-has-extras="true"
+                  data-is-pizza="true"
+                  data-prices='{"P":34,"M":44,"G":50}'
+                  title="Adicionar"
+                >
+                  <i class="fa fa-cart-plus"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="product-card" data-product-name="Pizza Frango c/ Catupiry">
+            <div class="product-img-wrap"><div class="esgotado-overlay"><i class="fa fa-ban"></i><span>Esgotado</span></div><img
+              src="assets/img-01.jpg"
+              alt="Frango c/ Catupiry"
+              class="product-img"
+            /></div>
+            <div class="product-body">
+              <p class="product-name">Frango c/ Catupiry<span class="esgotado-badge">Esgotado</span></p>
+              <p class="product-desc">
+                Molho, Frango, Catupiry, Mussarela, Tomate, Milho, Azeitona e
+                Orégano
+              </p>
+              <div class="product-footer">
+                <span class="product-price">A partir R$ 30,00</span>
+                <button
+                  class="add-cart-btn add-td-cart-btn"
+                  data-name="Pizza Frango c/ Catupiry"
+                  data-price="34.00"
+                  data-has-extras="true"
+                  data-is-pizza="true"
+                  data-prices='{"P":34,"M":44,"G":50}'
+                  title="Adicionar"
+                >
+                  <i class="fa fa-cart-plus"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="product-card" data-product-name="Pizza Frango c/ Creme de Leite">
+            <div class="product-img-wrap"><div class="esgotado-overlay"><i class="fa fa-ban"></i><span>Esgotado</span></div><img
+              src="assets/frango-creme.jpeg"
+              alt="Frango c/ Creme de Leite"
+              class="product-img"
+            /></div>
+            <div class="product-body">
+              <p class="product-name">Frango c/ Creme de Leite<span class="esgotado-badge">Esgotado</span></p>
+              <p class="product-desc">
+                Molho, Frango, Mussarela, Creme de Leite, Tomate, Milho,
+                Azeitona e Orégano
+              </p>
+              <div class="product-footer">
+                <span class="product-price">A partir R$ 30,00</span>
+                <button
+                  class="add-cart-btn add-td-cart-btn"
+                  data-name="Pizza Frango c/ Creme de Leite"
+                  data-price="34.00"
+                  data-has-extras="true"
+                  data-is-pizza="true"
+                  data-prices='{"P":34,"M":44,"G":50}'
+                  title="Adicionar"
+                >
+                  <i class="fa fa-cart-plus"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="product-card" data-product-name="Pizza 2 Queijos">
+            <div class="product-img-wrap"><div class="esgotado-overlay"><i class="fa fa-ban"></i><span>Esgotado</span></div><img src="assets/hamb-6.png" alt="2 Queijos" class="product-img" /></div>
+            <div class="product-body">
+              <p class="product-name">2 Queijos<span class="esgotado-badge">Esgotado</span></p>
+              <p class="product-desc">
+                Molho, Mussarela, Catupiry, Tomate, Milho, Azeitona e Orégano
+              </p>
+              <div class="product-footer">
+                <span class="product-price">A partir R$ 30,00</span>
+                <button
+                  class="add-cart-btn add-td-cart-btn"
+                  data-name="Pizza 2 Queijos"
+                  data-price="33.00"
+                  data-has-extras="true"
+                  data-is-pizza="true"
+                  data-prices='{"P":33,"M":43,"G":48}'
+                  title="Adicionar"
+                >
+                  <i class="fa fa-cart-plus"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="product-card" data-product-name="Pizza Portuguesa">
+            <div class="product-img-wrap"><div class="esgotado-overlay"><i class="fa fa-ban"></i><span>Esgotado</span></div><img
+              src="assets/portuguesa.jpeg"
+              alt="Portuguesa"
+              class="product-img"
+            /></div>
+            <div class="product-body">
+              <p class="product-name">Portuguesa<span class="esgotado-badge">Esgotado</span></p>
+              <p class="product-desc">
+                Molho, Presunto, Mussarela, Calabresa, Bacon, Ovo, Cebola,
+                Tomate, Milho, Azeitona e Orégano
+              </p>
+              <div class="product-footer">
+                <span class="product-price">A partir R$ 30,00</span>
+                <button
+                  class="add-cart-btn add-td-cart-btn"
+                  data-name="Pizza Portuguesa"
+                  data-price="34.00"
+                  data-has-extras="true"
+                  data-is-pizza="true"
+                  data-prices='{"P":34,"M":44,"G":50}'
+                  title="Adicionar"
+                >
+                  <i class="fa fa-cart-plus"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="product-card" data-product-name="Pizza Carne Seca">
+            <div class="product-img-wrap"><div class="esgotado-overlay"><i class="fa fa-ban"></i><span>Esgotado</span></div><img src="assets/hamb-8.png" alt="Carne Seca" class="product-img" /></div>
+            <div class="product-body">
+              <p class="product-name">Carne Seca<span class="esgotado-badge">Esgotado</span></p>
+              <p class="product-desc">
+                Molho, Presunto, Mussarela, Carne Seca, Tomate, Milho, Azeitona
+                e Orégano
+              </p>
+              <div class="product-footer">
+                <span class="product-price">A partir R$ 30,00</span>
+                <button
+                  class="add-cart-btn add-td-cart-btn"
+                  data-name="Pizza Carne Seca"
+                  data-price="34.00"
+                  data-has-extras="true"
+                  data-is-pizza="true"
+                  data-prices='{"P":34,"M":44,"G":50}'
+                  title="Adicionar"
+                >
+                  <i class="fa fa-cart-plus"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="product-card" data-product-name="Pizza Carne Seca com Banana">
+            <div class="product-img-wrap"><div class="esgotado-overlay"><i class="fa fa-ban"></i><span>Esgotado</span></div><img
+              src="assets/hamb-1.png"
+              alt="Carne Seca com Banana"
+              class="product-img"
+            /></div>
+            <div class="product-body">
+              <p class="product-name">Carne Seca com Banana<span class="esgotado-badge">Esgotado</span></p>
+              <p class="product-desc">
+                Molho, Mussarela, Carne Seca, Banana, Tomate, Milho, Azeitona e
+                Orégano
+              </p>
+              <div class="product-footer">
+                <span class="product-price">A partir R$ 30,00</span>
+                <button
+                  class="add-cart-btn add-td-cart-btn"
+                  data-name="Pizza Carne Seca com Banana"
+                  data-price="34.00"
+                  data-has-extras="true"
+                  data-is-pizza="true"
+                  data-prices='{"P":34,"M":44,"G":50}'
+                  title="Adicionar"
+                >
+                  <i class="fa fa-cart-plus"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="product-card" data-product-name="Pizza Francesa">
+            <div class="product-img-wrap"><div class="esgotado-overlay"><i class="fa fa-ban"></i><span>Esgotado</span></div><img src="assets/hamb-2.png" alt="Francesa" class="product-img" /></div>
+            <div class="product-body">
+              <p class="product-name">Francesa<span class="esgotado-badge">Esgotado</span></p>
+              <p class="product-desc">
+                Molho, Presunto, Mussarela, Batata Palha, Cebola, Tomate, Milho,
+                Azeitona e Orégano
+              </p>
+              <div class="product-footer">
+                <span class="product-price">A partir R$ 30,00</span>
+                <button
+                  class="add-cart-btn add-td-cart-btn"
+                  data-name="Pizza Francesa"
+                  data-price="33.00"
+                  data-has-extras="true"
+                  data-is-pizza="true"
+                  data-prices='{"P":33,"M":43,"G":48}'
+                  title="Adicionar"
+                >
+                  <i class="fa fa-cart-plus"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="product-card" data-product-name="Pizza Presunto e Musarela">
+            <div class="product-img-wrap"><div class="esgotado-overlay"><i class="fa fa-ban"></i><span>Esgotado</span></div><img
+              src="assets/hamb-3.png"
+              alt="Presunto e Musarela"
+              class="product-img"
+            /></div>
+            <div class="product-body">
+              <p class="product-name">Presunto e Musarela<span class="esgotado-badge">Esgotado</span></p>
+              <p class="product-desc">
+                Molho, Presunto, Mussarela, Tomate, Milho, Azeitona e Orégano
+              </p>
+              <div class="product-footer">
+                <span class="product-price">A partir R$ 30,00</span>
+                <button
+                  class="add-cart-btn add-td-cart-btn"
+                  data-name="Pizza Presunto e Musarela"
+                  data-price="33.00"
+                  data-has-extras="true"
+                  data-is-pizza="true"
+                  data-prices='{"P":33,"M":43,"G":48}'
+                  title="Adicionar"
+                >
+                  <i class="fa fa-cart-plus"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ─── LANCHES ─── -->
+      <section class="menu-section" id="section-lanches">
+        <div class="section-header">
+          <div class="section-icon"><i class="fa fa-hamburger"></i></div>
+          <h2 class="section-title">Sanduíches</h2>
+          <hr class="section-divider" />
+        </div>
+
+        <div class="products-grid">
+          <div class="product-card" data-product-name="Bauru">
+            <div class="product-img-wrap"><div class="esgotado-overlay"><i class="fa fa-ban"></i><span>Esgotado</span></div><img src="assets/hamb-1.png" alt="Bauru" class="product-img" /></div>
+            <div class="product-body">
+              <p class="product-name">Bauru<span class="esgotado-badge">Esgotado</span></p>
+              <p class="product-desc">
+                Pão, Presunto, Mussarela, Tomate, Batata Palha e Milho
+              </p>
+              <div class="product-footer">
+                <span class="product-price">R$ 8,00</span>
+                <button
+                  class="add-cart-btn add-td-cart-btn"
+                  data-name="Bauru"
+                  data-price="8.00"
+                  data-has-extras="true"
+                  title="Adicionar"
+                >
+                  <i class="fa fa-cart-plus"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="product-card" data-product-name="X-Salada">
+            <div class="product-img-wrap"><div class="esgotado-overlay"><i class="fa fa-ban"></i><span>Esgotado</span></div><img src="assets/hamb-2.png" alt="X-Salada" class="product-img" /></div>
+            <div class="product-body">
+              <p class="product-name">X-Salada<span class="esgotado-badge">Esgotado</span></p>
+              <p class="product-desc">
+                Pão, Hambúrguer, Mussarela, Tomate, Alface, Batata Palha e
+                Presunto
+              </p>
+              <div class="product-footer">
+                <span class="product-price">R$ 12,00</span>
+                <button
+                  class="add-cart-btn add-td-cart-btn"
+                  data-name="X-Salada"
+                  data-price="13.00"
+                  data-has-extras="true"
+                  title="Adicionar"
+                >
+                  <i class="fa fa-cart-plus"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="product-card" data-product-name="X-Calabresa">
+            <div class="product-img-wrap"><div class="esgotado-overlay"><i class="fa fa-ban"></i><span>Esgotado</span></div><img
+              src="assets/hamb-3.png"
+              alt="X-Calabresa"
+              class="product-img"
+            /></div>
+            <div class="product-body">
+              <p class="product-name">X-Calabresa<span class="esgotado-badge">Esgotado</span></p>
+              <p class="product-desc">
+                Pão, Hambúrguer, Presunto, Mussarela, Calabresa, Alface, Batata
+                Palha e Tomate
+              </p>
+              <div class="product-footer">
+                <span class="product-price">R$ 14,00</span>
+                <button
+                  class="add-cart-btn add-td-cart-btn"
+                  data-name="X-Calabresa"
+                  data-price="16.00"
+                  data-has-extras="true"
+                  title="Adicionar"
+                >
+                  <i class="fa fa-cart-plus"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="product-card" data-product-name="X-Salada c/ Catupiri">
+            <div class="product-img-wrap"><div class="esgotado-overlay"><i class="fa fa-ban"></i><span>Esgotado</span></div><img
+              src="assets/hamb-4.png"
+              alt="X-Salada c/ Catupiri"
+              class="product-img"
+            /></div>
+            <div class="product-body">
+              <p class="product-name">X-Salada c/ Catupiri<span class="esgotado-badge">Esgotado</span></p>
+              <p class="product-desc">
+                Pão, Hambúrguer, Presunto, Mussarela, Ovo, Tomate, Alface,
+                Batata Palha, Milho e Catupiri
+              </p>
+              <div class="product-footer">
+                <span class="product-price">R$ 14,00</span>
+                <button
+                  class="add-cart-btn add-td-cart-btn"
+                  data-name="X-Salada c/ Catupiri"
+                  data-price="16.00"
+                  data-has-extras="true"
+                  title="Adicionar"
+                >
+                  <i class="fa fa-cart-plus"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="product-card" data-product-name="X-Bacon">
+            <div class="product-img-wrap"><div class="esgotado-overlay"><i class="fa fa-ban"></i><span>Esgotado</span></div><img src="assets/hamb-5.png" alt="X-Bacon" class="product-img" /></div>
+            <div class="product-body">
+              <p class="product-name">X-Bacon<span class="esgotado-badge">Esgotado</span></p>
+              <p class="product-desc">
+                Pão, Hambúrguer, Presunto, Milho, Mussarela, Bacon, Alface,
+                Tomate e Batata Palha
+              </p>
+              <div class="product-footer">
+                <span class="product-price">R$ 14,00</span>
+                <button
+                  class="add-cart-btn add-td-cart-btn"
+                  data-name="X-Bacon"
+                  data-price="16.00"
+                  data-has-extras="true"
+                  title="Adicionar"
+                >
+                  <i class="fa fa-cart-plus"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="product-card" data-product-name="X-Cheddar">
+            <div class="product-img-wrap"><div class="esgotado-overlay"><i class="fa fa-ban"></i><span>Esgotado</span></div><img src="assets/hamb-6.png" alt="X-Cheddar" class="product-img" /></div>
+            <div class="product-body">
+              <p class="product-name">X-Cheddar<span class="esgotado-badge">Esgotado</span></p>
+              <p class="product-desc">
+                Pão, Hambúrguer, Presunto, Mussarela, Cheddar, Milho, Alface,
+                Batata Palha, Tomate e Ovo
+              </p>
+              <div class="product-footer">
+                <span class="product-price">R$ 14,00</span>
+                <button
+                  class="add-cart-btn add-td-cart-btn"
+                  data-name="X-Cheddar"
+                  data-price="16.00"
+                  data-has-extras="true"
+                  title="Adicionar"
+                >
+                  <i class="fa fa-cart-plus"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="product-card" data-product-name="X-Tudo">
+            <div class="product-img-wrap"><div class="esgotado-overlay"><i class="fa fa-ban"></i><span>Esgotado</span></div><img src="assets/hamb-7.png" alt="X-Tudo" class="product-img" /></div>
+            <div class="product-body">
+              <p class="product-name">X-Tudo<span class="esgotado-badge">Esgotado</span></p>
+              <p class="product-desc">
+                Pão, Hambúrguer, Presunto, Mussarela, Salsicha, Calabresa,
+                Bacon, Ovo, Milho, Alface, Batata Palha e Tomate
+              </p>
+              <div class="product-footer">
+                <span class="product-price">R$ 17,00</span>
+                <button
+                  class="add-cart-btn add-td-cart-btn"
+                  data-name="X-Tudo"
+                  data-price="19.00"
+                  data-has-extras="true"
+                  title="Adicionar"
+                >
+                  <i class="fa fa-cart-plus"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="product-card" data-product-name="X-Bacon c/ Catupiry">
+            <div class="product-img-wrap"><div class="esgotado-overlay"><i class="fa fa-ban"></i><span>Esgotado</span></div><img
+              src="assets/hamb-8.png"
+              alt="X-Bacon c/ Catupiry"
+              class="product-img"
+            /></div>
+            <div class="product-body">
+              <p class="product-name">X-Bacon c/ Catupiry<span class="esgotado-badge">Esgotado</span></p>
+              <p class="product-desc">
+                Pão, Hambúrguer, Presunto, Mussarela, Bacon, Catupiry, Ovo,
+                Tomate, Salsicha, Alface e Batata Palha
+              </p>
+              <div class="product-footer">
+                <span class="product-price">R$ 17,00</span>
+                <button
+                  class="add-cart-btn add-td-cart-btn"
+                  data-name="X-Bacon c/ Catupiry"
+                  data-price="19.00"
+                  data-has-extras="true"
+                  title="Adicionar"
+                >
+                  <i class="fa fa-cart-plus"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="product-card" data-product-name="X-Calabresa c/ Cheddar">
+            <div class="product-img-wrap"><div class="esgotado-overlay"><i class="fa fa-ban"></i><span>Esgotado</span></div><img
+              src="assets/hamb-1.png"
+              alt="X-Calabresa c/ Cheddar"
+              class="product-img"
+            /></div>
+            <div class="product-body">
+              <p class="product-name">X-Calabresa c/ Cheddar<span class="esgotado-badge">Esgotado</span></p>
+              <p class="product-desc">
+                Pão, Hambúrguer, Presunto, Mussarela, Ovo, Calabresa, Cheddar,
+                Tomate, Milho, Alface e Batata Palha
+              </p>
+              <div class="product-footer">
+                <span class="product-price">R$ 17,00</span>
+                <button
+                  class="add-cart-btn add-td-cart-btn"
+                  data-name="X-Calabresa c/ Cheddar"
+                  data-price="19.00"
+                  data-has-extras="true"
+                  title="Adicionar"
+                >
+                  <i class="fa fa-cart-plus"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="product-card" data-product-name="X-R.A.">
+            <div class="product-img-wrap"><div class="esgotado-overlay"><i class="fa fa-ban"></i><span>Esgotado</span></div><img src="assets/hamb-2.png" alt="X-R.A." class="product-img" /></div>
+            <div class="product-body">
+              <p class="product-name">
+                X-R.A. <span class="badge-new">Especial</span>
+              <span class="esgotado-badge">Esgotado</span></p>
+              <p class="product-desc">
+                Pão, Hambúrguer, Presunto, Mussarela, Calabresa, Catupiry, Ovo,
+                Bacon, Milho, Tomate, Salsicha, Alface e Batata Palha
+              </p>
+              <div class="product-footer">
+                <span class="product-price">R$ 18,00</span>
+                <button
+                  class="add-cart-btn add-td-cart-btn"
+                  data-name="X-R.A."
+                  data-price="20.00"
+                  data-has-extras="true"
+                  title="Adicionar"
+                >
+                  <i class="fa fa-cart-plus"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ─── BEBIDAS ─── -->
+      <section class="menu-section" id="section-bebidas">
+        <div class="section-header">
+          <div class="section-icon"><i class="fa fa-glass-cheers"></i></div>
+          <h2 class="section-title">Bebidas</h2>
+          <hr class="section-divider" />
+        </div>
+
+        <!-- Sucos -->
+        <p
+          style="
+            font-family: &quot;Oswald&quot;, sans-serif;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--dark);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin: 0 0 0.75rem;
+          "
+        >
+          <i
+            class="fa fa-lemon"
+            style="color: var(--amber); margin-right: 0.4rem"
+          ></i
+          >Sucos
+        </p>
+        <div class="products-grid" style="margin-bottom: 1.5rem">
+          <div class="product-card" data-product-name="Suco de Laranja 500ml">
+            <div class="product-img-wrap"><div class="esgotado-overlay"><i class="fa fa-ban"></i><span>Esgotado</span></div><img
+              src="assets/img-03.png"
+              alt="Suco de Laranja"
+              class="product-img"
+            /></div>
+            <div class="product-body">
+              <p class="product-name">Suco de Laranja<span class="esgotado-badge">Esgotado</span></p>
+              <p class="product-desc">Natural 500ml</p>
+              <div class="product-footer">
+                <span class="product-price">R$ 12,00</span>
+                <button
+                  class="add-cart-btn add-td-cart-btn"
+                  data-name="Suco de Laranja 500ml"
+                  data-price="13.00"
+                  data-has-extras="false"
+                  title="Adicionar"
+                >
+                  <i class="fa fa-cart-plus"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Refrigerantes -->
+        <p
+          style="
+            font-family: &quot;Oswald&quot;, sans-serif;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--dark);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin: 0 0 0.75rem;
+          "
+        >
+          <i
+            class="fa fa-bottle-water"
+            style="color: var(--red); margin-right: 0.4rem"
+          ></i
+          >Refrigerantes
+        </p>
+        <div class="products-grid">
+          <div class="product-card" data-product-name="Coca-Cola 2L">
+            <div class="product-img-wrap"><div class="esgotado-overlay"><i class="fa fa-ban"></i><span>Esgotado</span></div><img
+              src="assets/img-04.png"
+              alt="Coca-Cola 2L"
+              class="product-img"
+            /></div>
+            <div class="product-body">
+              <p class="product-name">Coca-Cola 2L<span class="esgotado-badge">Esgotado</span></p>
+              <p class="product-desc">Garrafa 2 litros</p>
+              <div class="product-footer">
+                <span class="product-price">R$ 15,00</span>
+                <button
+                  class="add-cart-btn add-td-cart-btn"
+                  data-name="Coca-Cola 2L"
+                  data-price="15.00"
+                  data-has-extras="false"
+                  title="Adicionar"
+                >
+                  <i class="fa fa-cart-plus"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="product-card" data-product-name="Coca-Cola 1L">
+            <div class="product-img-wrap"><div class="esgotado-overlay"><i class="fa fa-ban"></i><span>Esgotado</span></div><img
+              src="assets/img-05.png"
+              alt="Coca-Cola 1L"
+              class="product-img"
+            /></div>
+            <div class="product-body">
+              <p class="product-name">Coca-Cola 1L<span class="esgotado-badge">Esgotado</span></p>
+              <p class="product-desc">Garrafa 1 litro</p>
+              <div class="product-footer">
+                <span class="product-price">R$ 10,00</span>
+                <button
+                  class="add-cart-btn add-td-cart-btn"
+                  data-name="Coca-Cola 1L"
+                  data-price="12.00"
+                  data-has-extras="false"
+                  title="Adicionar"
+                >
+                  <i class="fa fa-cart-plus"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="product-card" data-product-name="Guaraná 2L">
+            <div class="product-img-wrap"><div class="esgotado-overlay"><i class="fa fa-ban"></i><span>Esgotado</span></div><img src="assets/img-06.png" alt="Guaraná 2L" class="product-img" /></div>
+            <div class="product-body">
+              <p class="product-name">Guaraná 2L<span class="esgotado-badge">Esgotado</span></p>
+              <p class="product-desc">Garrafa 2 litros</p>
+              <div class="product-footer">
+                <span class="product-price">R$ 14,00</span>
+                <button
+                  class="add-cart-btn add-td-cart-btn"
+                  data-name="Guaraná 2L"
+                  data-price="15.00"
+                  data-has-extras="false"
+                  title="Adicionar"
+                >
+                  <i class="fa fa-cart-plus"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="product-card" data-product-name="Guaraná 1L">
+            <div class="product-img-wrap"><div class="esgotado-overlay"><i class="fa fa-ban"></i><span>Esgotado</span></div><img src="assets/img-09.png" alt="Guaraná 1L" class="product-img" /></div>
+            <div class="product-body">
+              <p class="product-name">Guaraná 1L<span class="esgotado-badge">Esgotado</span></p>
+              <p class="product-desc">Garrafa 1 litro</p>
+              <div class="product-footer">
+                <span class="product-price">R$ 10,00</span>
+                <button
+                  class="add-cart-btn add-td-cart-btn"
+                  data-name="Guaraná 1L"
+                  data-price="10.00"
+                  data-has-extras="false"
+                  title="Adicionar"
+                >
+                  <i class="fa fa-cart-plus"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="product-card" data-product-name="Coca-Cola Lata">
+            <div class="product-img-wrap"><div class="esgotado-overlay"><i class="fa fa-ban"></i><span>Esgotado</span></div><img
+              src="assets/refri-1.png"
+              alt="Coca-Cola Lata"
+              class="product-img"
+            /></div>
+            <div class="product-body">
+              <p class="product-name">Coca-Cola Lata<span class="esgotado-badge">Esgotado</span></p>
+              <p class="product-desc">Lata 350ml gelada</p>
+              <div class="product-footer">
+                <span class="product-price">R$ 5,00</span>
+                <button
+                  class="add-cart-btn add-td-cart-btn"
+                  data-name="Coca-Cola Lata"
+                  data-price="6.00"
+                  data-has-extras="false"
+                  title="Adicionar"
+                >
+                  <i class="fa fa-cart-plus"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="product-card" data-product-name="Guaraná Lata">
+            <div class="product-img-wrap"><div class="esgotado-overlay"><i class="fa fa-ban"></i><span>Esgotado</span></div><img
+              src="assets/refri-2.png"
+              alt="Guaraná Lata"
+              class="product-img"
+            /></div>
+            <div class="product-body">
+              <p class="product-name">Guaraná Lata<span class="esgotado-badge">Esgotado</span></p>
+              <p class="product-desc">Lata 350ml gelada</p>
+              <div class="product-footer">
+                <span class="product-price">R$ 5,00</span>
+                <button
+                  class="add-cart-btn add-td-cart-btn"
+                  data-name="Guaraná Lata"
+                  data-price="6.00"
+                  data-has-extras="false"
+                  title="Adicionar"
+                >
+                  <i class="fa fa-cart-plus"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="product-card" data-product-name="Água s/ Gás">
+            <div class="product-img-wrap"><div class="esgotado-overlay"><i class="fa fa-ban"></i><span>Esgotado</span></div><img
+              src="assets/img-08.png"
+              alt="Água s/ Gás"
+              class="product-img"
+            /></div>
+            <div class="product-body">
+              <p class="product-name">Água s/ Gás<span class="esgotado-badge">Esgotado</span></p>
+              <p class="product-desc">Garrafa gelada</p>
+              <div class="product-footer">
+                <span class="product-price">R$ 3,00</span>
+                <button
+                  class="add-cart-btn add-td-cart-btn"
+                  data-name="Água s/ Gás"
+                  data-price="3.00"
+                  data-has-extras="false"
+                  title="Adicionar"
+                >
+                  <i class="fa fa-cart-plus"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="product-card" data-product-name="Coca-Cola Lata Zero">
+            <div class="product-img-wrap"><div class="esgotado-overlay"><i class="fa fa-ban"></i><span>Esgotado</span></div><img
+              src="assets/img-07.png"
+              alt="Coca-Cola Lata Zero"
+              class="product-img"
+            /></div>
+            <div class="product-body">
+              <p class="product-name">Coca-Cola Lata Zero<span class="esgotado-badge">Esgotado</span></p>
+              <p class="product-desc">Lata 350ml sem açúcar</p>
+              <div class="product-footer">
+                <span class="product-price">R$ 6,00</span>
+                <button
+                  class="add-cart-btn add-td-cart-btn"
+                  data-name="Coca-Cola Lata Zero"
+                  data-price="6.50"
+                  data-has-extras="false"
+                  title="Adicionar"
+                >
+                  <i class="fa fa-cart-plus"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div id="page-bottom"></div>
+    </div>
+    <!-- ═══ FIM MENU ═══ -->
+
+    <!-- ═══ MODAL ADICIONAIS ═══ -->
+    <div class="extras-modal-overlay" id="extras-modal">
+      <div class="extras-modal-box">
+        <div class="extras-header">
+          <h3>
+            <i
+              class="fa fa-plus-circle"
+              style="color: var(--red); margin-right: 0.4rem"
+            ></i>
+            Personalizar Pedido
+          </h3>
+          <button class="modal-close" id="extras-modal-close">
+            <i class="fa fa-times"></i>
+          </button>
+        </div>
+        <div class="extras-body">
+          <p class="extras-product-name" id="extras-product-name"></p>
+
+          <!-- Tamanho da pizza (apenas para pizzas) -->
+          <div id="pizza-size-section" style="display: none">
+            <p class="extras-obs-label">
+              <i class="fa fa-ruler-combined" style="color: var(--amber)"></i>
+              Tamanho da Pizza
+            </p>
+            <div
+              style="display: flex; gap: 0.5rem; flex-wrap: wrap"
+              id="pizza-size-btns"
+            >
+              <button
+                type="button"
+                class="pizza-size-btn option-btn"
+                data-size="P"
+                onclick="selectPizzaSize('P')"
+                style="flex: 1; min-width: 70px"
+              >
+                <span>P</span
+                ><small
+                  style="display: block; font-size: 0.7rem; opacity: 0.8"
+                  id="price-label-P"
+                  >R$ 30</small
+                >
+              </button>
+              <button
+                type="button"
+                class="pizza-size-btn option-btn"
+                data-size="M"
+                onclick="selectPizzaSize('M')"
+                style="flex: 1; min-width: 70px"
+              >
+                <span>M</span
+                ><small
+                  style="display: block; font-size: 0.7rem; opacity: 0.8"
+                  id="price-label-M"
+                  >R$ 40</small
+                >
+              </button>
+              <button
+                type="button"
+                class="pizza-size-btn option-btn"
+                data-size="G"
+                onclick="selectPizzaSize('G')"
+                style="flex: 1; min-width: 70px"
+              >
+                <span>G</span
+                ><small
+                  style="display: block; font-size: 0.7rem; opacity: 0.8"
+                  id="price-label-G"
+                  >R$ 45</small
+                >
+              </button>
+            </div>
+            <p class="form-warn" id="pizza-size-warn" style="display: none">
+              <i class="fa fa-exclamation-circle"></i> Selecione o tamanho da
+              pizza
+            </p>
+          </div>
+
+          <!-- Segundo sabor (apenas para pizzas) -->
+          <div id="second-flavor-section" style="display: none">
+            <p class="extras-obs-label">
+              <i class="fa fa-pizza-slice" style="color: var(--red)"></i>
+              Segundo sabor (metade da pizza)
+            </p>
+            <select class="form-input" id="second-flavor-select">
+              <option value="">— Apenas um sabor (inteira) —</option>
+              <option value="Pizza Moda da Casa">🍕 Moda da Casa</option>
+              <option value="Pizza Calabresa">🍕 Calabresa</option>
+              <option value="Pizza Calabresa c/ Barbecue">
+                🍕 Calabresa c/ Barbecue
+              </option>
+              <option value="Pizza Frango c/ Catupiry">
+                🍕 Frango c/ Catupiry
+              </option>
+              <option value="Pizza Frango c/ Creme de Leite">
+                🍕 Frango c/ Creme de Leite
+              </option>
+              <option value="Pizza 2 Queijos">🍕 2 Queijos</option>
+              <option value="Pizza Portuguesa">🍕 Portuguesa</option>
+              <option value="Pizza Carne Seca">🍕 Carne Seca</option>
+              <option value="Pizza Carne Seca com Banana">
+                🍕 Carne Seca com Banana
+              </option>
+              <option value="Pizza Francesa">🍕 Francesa</option>
+              <option value="Pizza Presunto e Musarela">
+                🍕 Presunto e Musarela
+              </option>
+            </select>
+          </div>
+
+          <!-- Adicionais (apenas para não-pizza) -->
+          <div id="extras-chips-section">
+            <p class="extras-obs-label">
+              <i class="fa fa-plus" style="color: var(--amber)"></i> Adicionais
+            </p>
+            <div class="extras-grid" id="extras-chips"></div>
+          </div>
+
+          <div>
+            <p class="extras-obs-label">
+              <i class="fa fa-comment-alt" style="color: #6b7280"></i>
+              Observação
+            </p>
+            <textarea
+              class="form-textarea"
+              id="extras-obs"
+              placeholder="Ex: sem cebola, molho à parte, ponto da carne..."
+            ></textarea>
+          </div>
+        </div>
+        <div class="extras-footer">
+          <button class="btn-cancel" id="extras-cancel-btn">Cancelar</button>
+          <button class="btn-confirm" id="extras-confirm-btn">
+            <i class="fa fa-cart-plus"></i> Adicionar ao Carrinho
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ MODAL CARRINHO ═══ -->
+    <div class="modal-overlay" id="cart-modal">
+      <div class="modal-box">
+        <div class="modal-handle"></div>
+
+        <div class="modal-header">
+          <div class="modal-header-row">
+            <h2 class="modal-title">
+              <i class="fa fa-shopping-cart" style="color: var(--red)"></i>
+              Meu Carrinho
+              <span
+                id="cart-count-modal"
+                style="
+                  background: var(--red);
+                  color: #fff;
+                  border-radius: 999px;
+                  font-size: 0.7rem;
+                  width: 20px;
+                  height: 20px;
+                  display: inline-flex;
+                  align-items: center;
+                  justify-content: center;
+                  font-family: &quot;Nunito&quot;, sans-serif;
+                  font-weight: 900;
+                "
+              ></span>
+            </h2>
+            <button id="close-modal-btn" class="modal-close" title="Fechar">
+              <i class="fa fa-times"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="modal-body">
+          <!-- Itens -->
+          <div id="cart-items"></div>
+
+          <!-- Tipo do pedido -->
+          <div class="form-section">
+            <span class="form-label"
+              ><i class="fa fa-motorcycle"></i> Tipo do pedido</span
+            >
+            <div class="btn-group">
+              <button
+                class="option-btn selected-order"
+                id="btn-delivery"
+                onclick="selectOrderType('delivery')"
+              >
+                <i class="fa fa-motorcycle"></i> Delivery
+              </button>
+              <button
+                class="option-btn"
+                id="btn-retirada"
+                onclick="selectOrderType('retirada')"
+              >
+                <i class="fa fa-store"></i> Retirada
+              </button>
+            </div>
+          </div>
+
+          <!-- Endereço -->
+          <div class="form-section" id="address-section">
+            <span class="form-label"
+              ><i class="fa fa-map-marker-alt"></i> Endereço de entrega</span
+            >
+            <input
+              type="text"
+              class="form-input"
+              id="address-input"
+              placeholder="Rua / Avenida, bairro..."
+              style="margin-bottom: 0.5rem"
+            />
+            <div style="display: flex; gap: 0.5rem">
+              <input
+                type="text"
+                class="form-input"
+                id="address-number"
+                placeholder="Número da casa"
+                style="flex: 1"
+              />
+              <input
+                type="text"
+                class="form-input"
+                id="address-ref"
+                placeholder="Ponto de referência"
+                style="flex: 2"
+              />
+            </div>
+            <p class="form-warn" id="address-warn">
+              <i class="fa fa-exclamation-circle"></i> Digite seu endereço com
+              número da casa
+            </p>
+          </div>
+
+          <!-- Forma de pagamento -->
+          <div class="form-section">
+            <span class="form-label"
+              ><i class="fa fa-credit-card"></i> Forma de pagamento</span
+            >
+            <div class="btn-group">
+              <button
+                class="option-btn selected-pay"
+                id="btn-pix"
+                onclick="selectPayment('pix')"
+              >
+                <i class="fa fa-qrcode"></i> Pix
+              </button>
+              <button
+                class="option-btn"
+                id="btn-cartao"
+                onclick="selectPayment('cartao')"
+              >
+                <i class="fa fa-credit-card"></i> Cartão
+              </button>
+              <button
+                class="option-btn"
+                id="btn-dinheiro"
+                onclick="selectPayment('dinheiro')"
+              >
+                <i class="fa fa-money-bill-wave"></i> Dinheiro
+              </button>
+            </div>
+          </div>
+
+          <!-- Troco -->
+          <div class="form-section" id="change-area" style="display: none">
+            <span class="form-label"
+              ><i class="fa fa-coins"></i> Troco para quanto?</span
+            >
+            <input
+              type="number"
+              class="form-input"
+              id="change-value"
+              placeholder="Ex: 50,00"
+              min="0"
+              step="0.01"
+            />
+            <p id="change-info" class="form-info"></p>
+          </div>
+
+          <!-- Dados do cliente -->
+          <div class="form-section">
+            <span class="form-label"
+              ><i class="fa fa-user"></i> Seus dados</span
+            >
+            <input
+              type="text"
+              class="form-input"
+              id="customer-name"
+              placeholder="Seu nome completo"
+              style="margin-bottom: 0.5rem"
+            />
+            <p class="form-warn" id="customer-name-warn" style="display: none">
+              <i class="fa fa-exclamation-circle"></i> Digite seu nome
+            </p>
+            <input
+              type="tel"
+              class="form-input"
+              id="customer-phone"
+              placeholder="Celular com DDD (ex: 63 99999-9999)"
+            />
+            <p class="form-warn" id="customer-phone-warn" style="display: none">
+              <i class="fa fa-exclamation-circle"></i> Digite seu celular com
+              DDD
+            </p>
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="modal-footer">
+          <div class="total-row">
+            <span class="total-label">Total do pedido</span>
+            <span class="total-value" id="cart-total">R$ 0,00</span>
+          </div>
+          <button id="checkout-btn" class="checkout-btn">
+            <i class="fab fa-whatsapp" style="font-size: 1.1rem"></i>
+            Finalizar Pedido via WhatsApp
+          </button>
+        </div>
+      </div>
+    </div>
+    <!-- ═══ FIM MODAL CARRINHO ═══ -->
+
+    <!-- ═══ FOOTER FIXO ═══ -->
+    <footer class="cart-footer">
+      <button class="cart-footer-btn" id="cart-btn">
+        <i class="fa fa-shopping-cart"></i>
+        Ver Carrinho
+        <span class="cart-badge" id="cart-count">0</span>
+      </button>
+    </footer>
+
+    <!-- ═══ MODAL PIX ═══ -->
+    <div
+      class="modal-overlay"
+      id="pix-modal"
+      style="display: none; align-items: center; justify-content: center"
+    >
+      <div
+        class="modal-box"
+        style="
+          max-width: 400px;
+          border-radius: 20px;
+          padding: 0;
+          overflow: hidden;
+        "
+      >
+        <!-- Header -->
+        <div
+          style="
+            background: linear-gradient(135deg, #00b377, #00875a);
+            padding: 20px 24px 16px;
+            text-align: center;
+            position: relative;
+          "
+        >
+          <button
+            onclick="closePIXModal()"
+            style="
+              position: absolute;
+              top: 12px;
+              right: 14px;
+              background: rgba(255, 255, 255, 0.2);
+              border: none;
+              color: #fff;
+              width: 30px;
+              height: 30px;
+              border-radius: 50%;
+              cursor: pointer;
+              font-size: 1rem;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+            "
+          >
+            <i class="fa fa-times"></i>
+          </button>
+          <div style="font-size: 2.5rem; margin-bottom: 6px">💠</div>
+          <h2
+            style="color: #fff; margin: 0; font-size: 1.2rem; font-weight: 800"
+          >
+            Pagamento via PIX
+          </h2>
+          <p
+            style="
+              color: rgba(255, 255, 255, 0.85);
+              margin: 4px 0 0;
+              font-size: 0.85rem;
+            "
+          >
+            Copie a chave abaixo e pague no seu banco
+          </p>
+        </div>
+
+        <!-- Body -->
+        <div style="padding: 24px">
+          <!-- Valor -->
+          <div style="text-align: center; margin-bottom: 20px">
+            <p
+              style="
+                margin: 0;
+                font-size: 0.8rem;
+                color: #888;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+              "
+            >
+              Valor a pagar
+            </p>
+            <p
+              id="pix-total-value"
+              style="
+                margin: 4px 0 0;
+                font-size: 2rem;
+                font-weight: 900;
+                color: #00875a;
+              "
+            ></p>
+          </div>
+
+          <!-- Chave PIX -->
+          <div
+            style="
+              background: #f5f5f5;
+              border-radius: 12px;
+              padding: 14px 16px;
+              margin-bottom: 16px;
+            "
+          >
+            <p
+              style="
+                margin: 0 0 6px;
+                font-size: 0.75rem;
+                color: #888;
+                font-weight: 700;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+              "
+            >
+              Chave PIX (Telefone)
+            </p>
+            <div style="display: flex; align-items: center; gap: 10px">
+              <span
+                id="pix-key-display"
+                style="
+                  flex: 1;
+                  font-size: 1rem;
+                  font-weight: 700;
+                  color: #222;
+                  letter-spacing: 1px;
+                  font-family: monospace;
+                "
+                >63992863557</span
+              >
+              <button
+                id="pix-copy-btn"
+                onclick="copyPIXKey()"
+                style="
+                  background: #00b377;
+                  color: #fff;
+                  border: none;
+                  border-radius: 8px;
+                  padding: 8px 14px;
+                  cursor: pointer;
+                  font-size: 0.8rem;
+                  font-weight: 700;
+                  white-space: nowrap;
+                  transition: background 0.2s;
+                "
+              >
+                <i class="fa fa-copy"></i> Copiar
+              </button>
+            </div>
+          </div>
+
+          <!-- Instruções -->
+          <div
+            style="
+              background: #fffbeb;
+              border: 1px solid #fde68a;
+              border-radius: 10px;
+              padding: 12px 14px;
+              margin-bottom: 20px;
+            "
+          >
+            <p
+              style="
+                margin: 0;
+                font-size: 0.82rem;
+                color: #92400e;
+                line-height: 1.5;
+              "
+            >
+              <strong>📋 Como pagar:</strong><br />
+              1. Copie a chave acima<br />
+              2. Abra seu banco e vá em <strong>Pix → Pagar</strong><br />
+              3. Cole a chave e confirme o valor
+              <strong id="pix-total-instruction"></strong><br />
+              4. Clique em <strong>"Já paguei!"</strong> abaixo
+            </p>
+          </div>
+
+          <!-- Aviso de pendente (oculto inicialmente) -->
+          <div
+            id="pix-pending-warn"
+            style="
+              display: none;
+              background: #fff3cd;
+              border: 1px solid #ffc107;
+              border-radius: 10px;
+              padding: 12px 14px;
+              margin-bottom: 16px;
+            "
+          >
+            <p style="margin: 0; font-size: 0.82rem; color: #856404">
+              <i class="fa fa-exclamation-triangle"></i>
+              <strong>Pagamento pendente!</strong><br />
+              Confirme que realizou o PIX antes de enviar o pedido.
+            </p>
+          </div>
+
+          <!-- Botões -->
+          <button
+            id="pix-confirm-btn"
+            onclick="confirmPIXPayment()"
+            style="
+              width: 100%;
+              background: linear-gradient(135deg, #25d366, #128c7e);
+              color: #fff;
+              border: none;
+              border-radius: 12px;
+              padding: 14px;
+              font-size: 1rem;
+              font-weight: 800;
+              cursor: pointer;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              gap: 8px;
+              margin-bottom: 10px;
+            "
+          >
+            <i class="fab fa-whatsapp" style="font-size: 1.2rem"></i>
+            Já paguei! Enviar pedido
+          </button>
+
+          <button
+            onclick="closePIXModal()"
+            style="
+              width: 100%;
+              background: transparent;
+              color: #888;
+              border: 1px solid #ddd;
+              border-radius: 12px;
+              padding: 11px;
+              font-size: 0.85rem;
+              font-weight: 600;
+              cursor: pointer;
+            "
+          >
+            Cancelar
+          </button>
+        </div>
+      </div>
+    </div>
+    <!-- ═══ FIM MODAL PIX ═══ -->
+
+    <!-- ═══ MODAL HISTÓRICO ═══ -->
+    <div class="history-modal-overlay" id="history-modal">
+      <div class="history-modal-box">
+        <div class="modal-handle"></div>
+        <div class="modal-header">
+          <div class="modal-header-row">
+            <h2 class="modal-title">
+              <i class="fa fa-history" style="color: var(--red)"></i>
+              Meus Pedidos
+            </h2>
+            <button class="modal-close" id="history-modal-close">
+              <i class="fa fa-times"></i>
+            </button>
+          </div>
+        </div>
+        <div class="history-modal-body" id="history-list"></div>
+        <div class="modal-footer">
+          <button
+            class="history-clear-btn"
+            id="history-clear-btn"
+            onclick="clearHistory()"
+          >
+            <i class="fa fa-trash"></i> Limpar histórico
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script src="script.js"></script>
+
+    <!--
+      ══════════════════════════════════════════════════════════════
+      FIREBASE INTEGRATION
+      Este módulo substitui a camada de localStorage por Firestore.
+      • saveOrderToHistory() → salva pedidos no Firestore
+      • Sistema de esgotado  → onSnapshot() em tempo real
+      Configurar credenciais em: js/firebase.js
+      ══════════════════════════════════════════════════════════════
+    -->
+    <script type="module" src="js/script-firebase-patch.js"></script>
+
+    <script>
+      // Selecionar tamanho da pizza no modal de adicionais
+      function selectPizzaSize(size) {
+        document.querySelectorAll(".pizza-size-btn").forEach((btn) => {
+          btn.classList.toggle("selected-order", btn.dataset.size === size);
+        });
+        const warn = document.getElementById("pizza-size-warn");
+        if (warn) warn.style.display = "none";
+      }
+
+      // Atualizar labels de preço ao abrir modal para pizza
+      document.addEventListener("DOMContentLoaded", function () {
+        const extrasModal = document.getElementById("extras-modal");
+
+        // Observer: quando o modal de adicionais abrir, mostrar/ocultar seções de pizza
+        const observer = new MutationObserver(function (mutations) {
+          mutations.forEach(function (m) {
+            if (m.type === "attributes" && m.attributeName === "class") {
+              if (extrasModal.classList.contains("active")) {
+                const isPizza = extrasModal.dataset.isPizza === "true";
+                document.getElementById("pizza-size-section").style.display =
+                  isPizza ? "block" : "none";
+                document.getElementById("second-flavor-section").style.display =
+                  isPizza ? "block" : "none";
+                document.getElementById("extras-chips-section").style.display =
+                  isPizza ? "none" : "block";
+                document
+                  .querySelectorAll(".pizza-size-btn")
+                  .forEach((btn) => btn.classList.remove("selected-order"));
+                try {
+                  const prices = JSON.parse(extrasModal.dataset.prices || "{}");
+                  if (prices.P)
+                    document.getElementById("price-label-P").textContent =
+                      "R$ " + prices.P;
+                  if (prices.M)
+                    document.getElementById("price-label-M").textContent =
+                      "R$ " + prices.M;
+                  if (prices.G)
+                    document.getElementById("price-label-G").textContent =
+                      "R$ " + prices.G;
+                } catch (e) {}
+              }
+            }
+          });
+        });
+        observer.observe(extrasModal, { attributes: true });
+
+        // Ao clicar em adicionar pizza: salvar preços e dados no dataset do modal
+        document.querySelectorAll(".add-td-cart-btn").forEach(function (btn) {
+          btn.addEventListener("click", function () {
+            extrasModal.dataset.isPizza = btn.dataset.isPizza || "false";
+            extrasModal.dataset.prices = btn.dataset.prices || "{}";
+            extrasModal.dataset.baseName = btn.dataset.name;
+          });
+        });
+      });
+    </script>
+  </body>
+</html>
