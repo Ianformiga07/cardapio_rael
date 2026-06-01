@@ -1,3 +1,6 @@
+// ─── FIREBASE ────────────────────────────────────────────────────────────────
+import { salvarPedido } from "./js/pedidos.js";
+
 // ─── ADICIONAIS DISPONÍVEIS ───────────────────────────────────────────────────
 const EXTRAS_LIST = [
   { id: "ovo", label: "🥚 Ovo", price: 2.0 },
@@ -676,12 +679,15 @@ function copyPIXKey() {
     });
 }
 
-function confirmPIXPayment() {
+async function confirmPIXPayment() {
   if (!_pixOrderSnapshot) return;
 
   const btn = document.getElementById("pix-confirm-btn");
   btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Abrindo WhatsApp...';
   btn.disabled = true;
+
+  // Salvar pedido PIX no Firestore
+  await saveOrderToHistory(_pixOrderSnapshot);
 
   const baseText = _pixOrderSnapshot.whatsappText;
   const pixNote =
@@ -737,11 +743,31 @@ function loadHistory() {
   }
 }
 
-function saveOrderToHistory(orderData) {
+async function saveOrderToHistory(orderData) {
+  // ── Salvar no Firestore ──────────────────────────────────────────────────
+  const firestoreId = await salvarPedido(orderData);
+
+  if (firestoreId) {
+    try {
+      localStorage.setItem("pizzaria_ra_last_order_id", firestoreId);
+      localStorage.setItem(
+        "pizzaria_ra_last_order_name",
+        orderData.customerName || "",
+      );
+    } catch (_) {}
+    // Disparar evento para o patch iniciar o rastreamento
+    window.dispatchEvent(
+      new CustomEvent("pizzaria:pedido_salvo", { detail: { firestoreId } }),
+    );
+  }
+
+  // ── Cache local leve ─────────────────────────────────────────────────────
   try {
-    const history = loadHistory();
-    history.unshift({
-      id: Date.now(),
+    const CACHE_KEY = "pizzaria_ra_orders_cache";
+    const cache = JSON.parse(localStorage.getItem(CACHE_KEY) || "[]");
+    cache.unshift({
+      firestoreId: firestoreId,
+      id: orderData.id || Date.now(),
       date: orderData.date,
       customerName: orderData.customerName,
       customerPhone: orderData.customerPhone,
@@ -750,12 +776,11 @@ function saveOrderToHistory(orderData) {
       orderType: orderData.orderType,
       paymentType: orderData.paymentType,
       address: orderData.address,
+      status: "Pendente",
     });
-    if (history.length > 30) history.splice(30);
-    localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
-  } catch (e) {
-    console.warn("Histórico não salvo:", e);
-  }
+    if (cache.length > 5) cache.splice(5);
+    localStorage.setItem(CACHE_KEY, JSON.stringify(cache));
+  } catch (_) {}
 }
 
 function openHistoryModal() {
@@ -920,24 +945,28 @@ const SOLDOUT_KEY = "pizzaria_ra_soldout";
 function loadSoldOut() {
   try {
     return JSON.parse(localStorage.getItem(SOLDOUT_KEY) || "[]");
-  } catch { return []; }
+  } catch {
+    return [];
+  }
 }
 
 function applySoldOut() {
   const soldOut = loadSoldOut();
-  document.querySelectorAll(".product-card[data-product-name]").forEach(card => {
-    const name = card.dataset.productName;
-    const isOut = soldOut.includes(name);
-    if (isOut) {
-      card.classList.add("esgotado");
-      const btn = card.querySelector(".add-td-cart-btn");
-      if (btn) btn.disabled = true;
-    } else {
-      card.classList.remove("esgotado");
-      const btn = card.querySelector(".add-td-cart-btn");
-      if (btn) btn.disabled = false;
-    }
-  });
+  document
+    .querySelectorAll(".product-card[data-product-name]")
+    .forEach((card) => {
+      const name = card.dataset.productName;
+      const isOut = soldOut.includes(name);
+      if (isOut) {
+        card.classList.add("esgotado");
+        const btn = card.querySelector(".add-td-cart-btn");
+        if (btn) btn.disabled = true;
+      } else {
+        card.classList.remove("esgotado");
+        const btn = card.querySelector(".add-td-cart-btn");
+        if (btn) btn.disabled = false;
+      }
+    });
 }
 
 // Aplicar ao carregar e escutar mudanças de outras abas (admin)
@@ -945,3 +974,15 @@ document.addEventListener("DOMContentLoaded", applySoldOut);
 window.addEventListener("storage", (e) => {
   if (e.key === SOLDOUT_KEY) applySoldOut();
 });
+
+// ─── EXPOR FUNÇÕES GLOBAIS (necessário com type="module") ─────────────────────
+// Com type="module" o escopo é isolado; os onclick do HTML precisam de window.*
+window.scrollToSection = scrollToSection;
+window.selectOrderType = selectOrderType;
+window.selectPayment = selectPayment;
+window.openHistoryModal = openHistoryModal;
+window.clearHistory = clearHistory;
+window.closePIXModal = closePIXModal;
+window.confirmPIXPayment = confirmPIXPayment;
+window.copyPIXKey = copyPIXKey;
+window.applySoldOut = applySoldOut;

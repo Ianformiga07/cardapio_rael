@@ -10,7 +10,6 @@
 //   4. [NOVO] Rastreamento de pedido em tempo real para o cliente
 // ============================================================
 
-import { salvarPedido } from "./pedidos.js";
 import { watchProdutos } from "./produtos.js";
 import { db } from "./firebase.js";
 import {
@@ -18,47 +17,22 @@ import {
   onSnapshot,
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-// ─── 1. SOBRESCREVER saveOrderToHistory() ────────────────────────────────────
-window.saveOrderToHistory = async function (orderData) {
-  const firestoreId = await salvarPedido(orderData);
+// ─── 1. ESCUTAR EVENTO DO script.js (módulo) ─────────────────────────────────
+// saveOrderToHistory() agora vive no script.js como módulo ES e chama
+// salvarPedido() diretamente. Após salvar, dispara o evento abaixo
+// para que o patch inicie o rastreamento em tempo real.
+window.addEventListener("pizzaria:pedido_salvo", (e) => {
+  const { firestoreId } = e.detail || {};
+  if (firestoreId) iniciarRastreamentoPedido(firestoreId);
+});
 
-  // Guardar o ID do Firestore para rastrear status depois
-  if (firestoreId) {
-    try {
-      localStorage.setItem("pizzaria_ra_last_order_id", firestoreId);
-      localStorage.setItem("pizzaria_ra_last_order_name", orderData.customerName || "");
-    } catch (_) {}
-    // Iniciar rastreamento automático
-    iniciarRastreamentoPedido(firestoreId);
-  }
-
-  // Cache leve para histórico do cliente
-  try {
-    const CACHE_KEY = "pizzaria_ra_orders_cache";
-    const cache = JSON.parse(localStorage.getItem(CACHE_KEY) || "[]");
-    cache.unshift({
-      firestoreId:  firestoreId,
-      id:           orderData.id || Date.now(),
-      date:         orderData.date,
-      customerName: orderData.customerName,
-      customerPhone:orderData.customerPhone,
-      items:        orderData.cartSnapshot,
-      total:        orderData.total,
-      orderType:    orderData.orderType,
-      paymentType:  orderData.paymentType,
-      address:      orderData.address,
-      status:       "Pendente",
-    });
-    if (cache.length > 5) cache.splice(5);
-    localStorage.setItem(CACHE_KEY, JSON.stringify(cache));
-  } catch (_) {}
-};
-
-// ─── 2. SUBSTITUIR loadHistory() ─────────────────────────────────────────────
+// ─── 2. loadHistory() ────────────────────────────────────────────────────────
 window.loadHistory = function () {
   try {
     return JSON.parse(localStorage.getItem("pizzaria_ra_orders_cache") || "[]");
-  } catch { return []; }
+  } catch {
+    return [];
+  }
 };
 
 // ─── 3. SISTEMA DE ESGOTADO VIA FIREBASE (onSnapshot) ────────────────────────
@@ -66,29 +40,56 @@ const _produtoMap = new Map();
 
 function applyEsgotadoFirebase(produtos) {
   _produtoMap.clear();
-  produtos.forEach(p => _produtoMap.set(p.nome, p));
+  produtos.forEach((p) => _produtoMap.set(p.nome, p));
 
-  document.querySelectorAll(".product-card[data-product-name]").forEach((card) => {
-    const nome = card.dataset.productName;
-    const prod = _produtoMap.get(nome);
-    if (!prod) return;
+  document
+    .querySelectorAll(".product-card[data-product-name]")
+    .forEach((card) => {
+      const nome = card.dataset.productName;
+      const prod = _produtoMap.get(nome);
+      if (!prod) return;
 
-    const isEsgotado = prod.esgotado === true;
-    card.classList.toggle("esgotado", isEsgotado);
+      const isEsgotado = prod.esgotado === true;
+      card.classList.toggle("esgotado", isEsgotado);
 
-    const btn = card.querySelector(".add-td-cart-btn");
-    if (btn) btn.disabled = isEsgotado;
-  });
+      const btn = card.querySelector(".add-td-cart-btn");
+      if (btn) btn.disabled = isEsgotado;
+    });
 }
 
 // ─── 4. RASTREAMENTO DE PEDIDO EM TEMPO REAL ─────────────────────────────────
 
 const STATUS_LABELS = {
-  "Pendente":          { emoji: "⏳", texto: "Aguardando confirmação", cor: "#f59e0b", progresso: 1 },
-  "Preparando":        { emoji: "👨‍🍳", texto: "Sendo preparado",       cor: "#3b82f6", progresso: 2 },
-  "Saiu para entrega": { emoji: "🛵", texto: "Saiu para entrega",      cor: "#8b5cf6", progresso: 3 },
-  "Entregue":          { emoji: "✅", texto: "Entregue com sucesso!",  cor: "#10b981", progresso: 4 },
-  "Cancelado":         { emoji: "❌", texto: "Pedido cancelado",       cor: "#ef4444", progresso: 0 },
+  Pendente: {
+    emoji: "⏳",
+    texto: "Aguardando confirmação",
+    cor: "#f59e0b",
+    progresso: 1,
+  },
+  Preparando: {
+    emoji: "👨‍🍳",
+    texto: "Sendo preparado",
+    cor: "#3b82f6",
+    progresso: 2,
+  },
+  "Saiu para entrega": {
+    emoji: "🛵",
+    texto: "Saiu para entrega",
+    cor: "#8b5cf6",
+    progresso: 3,
+  },
+  Entregue: {
+    emoji: "✅",
+    texto: "Entregue com sucesso!",
+    cor: "#10b981",
+    progresso: 4,
+  },
+  Cancelado: {
+    emoji: "❌",
+    texto: "Pedido cancelado",
+    cor: "#ef4444",
+    progresso: 0,
+  },
 };
 
 let _unsubTracking = null;
@@ -100,13 +101,17 @@ function iniciarRastreamentoPedido(pedidoId) {
     _unsubTracking = null;
   }
 
-  _unsubTracking = onSnapshot(doc(db, "pedidos", pedidoId), (snap) => {
-    if (!snap.exists()) return;
-    const pedido = snap.data();
-    atualizarBannerStatus(pedido.status || "Pendente", pedido);
-  }, (err) => {
-    console.error("[tracking] Erro ao rastrear pedido:", err);
-  });
+  _unsubTracking = onSnapshot(
+    doc(db, "pedidos", pedidoId),
+    (snap) => {
+      if (!snap.exists()) return;
+      const pedido = snap.data();
+      atualizarBannerStatus(pedido.status || "Pendente", pedido);
+    },
+    (err) => {
+      console.error("[tracking] Erro ao rastrear pedido:", err);
+    },
+  );
 }
 
 function atualizarBannerStatus(status, pedido) {
@@ -140,10 +145,10 @@ function atualizarBannerStatus(status, pedido) {
   }
 
   const passos = [
-    { label: "Recebido",  k: "Pendente" },
+    { label: "Recebido", k: "Pendente" },
     { label: "Preparando", k: "Preparando" },
-    { label: "Entrega",   k: "Saiu para entrega" },
-    { label: "Entregue",  k: "Entregue" },
+    { label: "Entrega", k: "Saiu para entrega" },
+    { label: "Entregue", k: "Entregue" },
   ];
 
   // Determinar progresso
@@ -152,19 +157,23 @@ function atualizarBannerStatus(status, pedido) {
 
   const passosHtml = isCancelado
     ? `<div style="text-align:center;font-size:0.78rem;color:#ef4444;font-weight:600;padding-top:4px;">Pedido cancelado</div>`
-    : passos.map((p, i) => {
-        const idx = i + 1;
-        const ativo = idx === progressoAtual;
-        const feito = idx < progressoAtual;
-        const cor = feito || ativo ? info.cor : "#d1d5db";
-        return `
+    : passos
+        .map((p, i) => {
+          const idx = i + 1;
+          const ativo = idx === progressoAtual;
+          const feito = idx < progressoAtual;
+          const cor = feito || ativo ? info.cor : "#d1d5db";
+          return `
           <div style="display:flex;flex-direction:column;align-items:center;gap:2px;flex:1;">
-            <div style="width:22px;height:22px;border-radius:50%;background:${cor};display:flex;align-items:center;justify-content:center;font-size:0.7rem;color:#fff;font-weight:700;box-shadow:${ativo ? '0 0 0 3px '+info.cor+'44' : 'none'};transition:all 0.3s;">
+            <div style="width:22px;height:22px;border-radius:50%;background:${cor};display:flex;align-items:center;justify-content:center;font-size:0.7rem;color:#fff;font-weight:700;box-shadow:${ativo ? "0 0 0 3px " + info.cor + "44" : "none"};transition:all 0.3s;">
               ${feito ? "✓" : idx}
             </div>
-            <span style="font-size:0.62rem;color:${ativo ? info.cor : '#9ca3af'};font-weight:${ativo ? 700 : 400};text-align:center;line-height:1.2;">${p.label}</span>
+            <span style="font-size:0.62rem;color:${ativo ? info.cor : "#9ca3af"};font-weight:${ativo ? 700 : 400};text-align:center;line-height:1.2;">${p.label}</span>
           </div>`;
-      }).join(`<div style="flex:1;height:2px;background:${progressoAtual > 1 ? info.cor : '#e5e7eb'};align-self:center;margin-bottom:14px;transition:background 0.3s;"></div>`);
+        })
+        .join(
+          `<div style="flex:1;height:2px;background:${progressoAtual > 1 ? info.cor : "#e5e7eb"};align-self:center;margin-bottom:14px;transition:background 0.3s;"></div>`,
+        );
 
   banner.innerHTML = `
     <div style="background:${info.cor};padding:10px 16px;display:flex;align-items:center;gap:8px;">
@@ -184,19 +193,27 @@ function atualizarBannerStatus(status, pedido) {
 
   // Salvar status atual no cache
   try {
-    const cache = JSON.parse(localStorage.getItem("pizzaria_ra_orders_cache") || "[]");
-    if (cache[0]) { cache[0].status = status; localStorage.setItem("pizzaria_ra_orders_cache", JSON.stringify(cache)); }
+    const cache = JSON.parse(
+      localStorage.getItem("pizzaria_ra_orders_cache") || "[]",
+    );
+    if (cache[0]) {
+      cache[0].status = status;
+      localStorage.setItem("pizzaria_ra_orders_cache", JSON.stringify(cache));
+    }
   } catch (_) {}
 
   // Notificação sonora/visual ao mudar de status
   if (status === "Saiu para entrega" || status === "Entregue") {
     banner.style.boxShadow = `0 8px 32px ${info.cor}66`;
     // Pulsação rápida
-    banner.animate([
-      { transform: "translateX(-50%) scale(1)" },
-      { transform: "translateX(-50%) scale(1.04)" },
-      { transform: "translateX(-50%) scale(1)" },
-    ], { duration: 400, iterations: 2 });
+    banner.animate(
+      [
+        { transform: "translateX(-50%) scale(1)" },
+        { transform: "translateX(-50%) scale(1.04)" },
+        { transform: "translateX(-50%) scale(1)" },
+      ],
+      { duration: 400, iterations: 2 },
+    );
   }
 }
 
@@ -206,8 +223,13 @@ function abrirModalTracking() {
   if (!ultimo) return;
 
   const info = STATUS_LABELS[ultimo.status] || STATUS_LABELS["Pendente"];
-  const itensTxt = (ultimo.items || []).map(i => `${i.quantity || 1}× ${i.name || i.nome}`).join(", ");
-  const totalFmt = (ultimo.total || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+  const itensTxt = (ultimo.items || [])
+    .map((i) => `${i.quantity || 1}× ${i.name || i.nome}`)
+    .join(", ");
+  const totalFmt = (ultimo.total || 0).toLocaleString("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+  });
 
   let modal = document.getElementById("tracking-modal");
   if (!modal) {
@@ -217,7 +239,9 @@ function abrirModalTracking() {
       position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,0.55);
       display:flex;align-items:flex-end;justify-content:center;
     `;
-    modal.onclick = (e) => { if (e.target === modal) fecharModalTracking(); };
+    modal.onclick = (e) => {
+      if (e.target === modal) fecharModalTracking();
+    };
     document.body.appendChild(modal);
   }
 
@@ -247,14 +271,17 @@ function abrirModalTracking() {
   modal.style.display = "flex";
 }
 
-window.fecharModalTracking = function() {
+window.fecharModalTracking = function () {
   const m = document.getElementById("tracking-modal");
   if (m) m.style.display = "none";
 };
-window.fecharTracking = function() {
+window.fecharTracking = function () {
   const b = document.getElementById("tracking-banner");
   if (b) b.remove();
-  if (_unsubTracking) { _unsubTracking(); _unsubTracking = null; }
+  if (_unsubTracking) {
+    _unsubTracking();
+    _unsubTracking = null;
+  }
 };
 
 // ─── INICIAR ao carregar DOM ─────────────────────────────────────────────────
@@ -267,9 +294,15 @@ document.addEventListener("DOMContentLoaded", () => {
   // Retomar rastreamento se há pedido recente em cache
   try {
     const lastId = localStorage.getItem("pizzaria_ra_last_order_id");
-    const cache  = JSON.parse(localStorage.getItem("pizzaria_ra_orders_cache") || "[]");
+    const cache = JSON.parse(
+      localStorage.getItem("pizzaria_ra_orders_cache") || "[]",
+    );
     // Só retomar se o último pedido não está entregue/cancelado
-    if (lastId && cache[0] && !["Entregue","Cancelado"].includes(cache[0].status)) {
+    if (
+      lastId &&
+      cache[0] &&
+      !["Entregue", "Cancelado"].includes(cache[0].status)
+    ) {
       iniciarRastreamentoPedido(lastId);
     }
   } catch (_) {}
