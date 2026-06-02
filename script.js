@@ -721,15 +721,60 @@ async function confirmPIXPayment() {
   if (!_pixOrderSnapshot) return;
 
   const btn = document.getElementById("pix-confirm-btn");
-  btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Abrindo WhatsApp...';
+  btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Salvando pedido...';
   btn.disabled = true;
 
-  await saveOrderToHistory(_pixOrderSnapshot);
+  // 1. Salvar no Firestore primeiro
+  const firestoreId = await salvarPedido(_pixOrderSnapshot);
 
+  if (firestoreId) {
+    try {
+      localStorage.setItem("pizzaria_ra_last_order_id", firestoreId);
+      localStorage.setItem(
+        "pizzaria_ra_last_order_name",
+        _pixOrderSnapshot.customerName || "",
+      );
+    } catch (_) {}
+    window.dispatchEvent(
+      new CustomEvent("pizzaria:pedido_salvo", { detail: { firestoreId } }),
+    );
+  }
+  try {
+    const CACHE_KEY = "pizzaria_ra_orders_cache";
+    const cache = JSON.parse(localStorage.getItem(CACHE_KEY) || "[]");
+    cache.unshift({
+      firestoreId,
+      id: _pixOrderSnapshot.id || Date.now(),
+      date: _pixOrderSnapshot.date,
+      customerName: _pixOrderSnapshot.customerName,
+      customerPhone: _pixOrderSnapshot.customerPhone,
+      items: _pixOrderSnapshot.cartSnapshot,
+      total: _pixOrderSnapshot.total,
+      orderType: _pixOrderSnapshot.orderType,
+      paymentType: _pixOrderSnapshot.paymentType,
+      address: _pixOrderSnapshot.address,
+      status: "Pendente",
+    });
+    if (cache.length > 5) cache.splice(5);
+    localStorage.setItem(CACHE_KEY, JSON.stringify(cache));
+  } catch (_) {}
+
+  // 2. Gerar link de acompanhamento
+  let trackingLine = "";
+  if (firestoreId) {
+    const base = window.location.href.replace(/\/[^\/]*$/, "/");
+    const trackingUrl = base + "acompanhar.html?id=" + firestoreId;
+    trackingLine =
+      "\n\n━━━━━━━━━━━━━━━━━━━━\n\n🔍 *Acompanhe seu pedido em tempo real:*\n" +
+      trackingUrl;
+  }
+
+  // 3. Abrir WhatsApp
+  btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Abrindo WhatsApp...';
   const baseText = _pixOrderSnapshot.whatsappText;
   const pixNote =
     "\n\n━━━━━━━━━━━━━━━━━━━━\n\n📎 *Por favor, envie o comprovante do PIX nesta conversa para confirmarmos seu pedido!* ✅";
-  const message = encodeURIComponent(baseText + pixNote);
+  const message = encodeURIComponent(baseText + pixNote + trackingLine);
   window.open(`https://wa.me/63992863557?text=${message}`, "_blank");
 
   setTimeout(() => {
@@ -748,40 +793,11 @@ async function confirmPIXPayment() {
 }
 
 // ─── ENVIAR PEDIDO ─────────────────────────────────────────────────────────────
-function sendOrderToWhatsApp(orderData) {
-  saveOrderToHistory(orderData);
-  window.open(
-    "https://wa.me/63992863557?text=" +
-      encodeURIComponent(orderData.whatsappText),
-    "_blank",
-  );
-  cart.length = 0;
-  changeValue.value = "";
-  changeInfo.style.display = "none";
-  customerName.value = "";
-  customerPhone.value = "";
-  customerNameWarn.style.display = "none";
-  customerPhoneWarn.style.display = "none";
-  customerName.classList.remove("input-error");
-  customerPhone.classList.remove("input-error");
-  pendingOrderData = null;
-  updateCartModal();
-  cartModal.classList.remove("active");
-}
-
-// ─── HISTÓRICO (localStorage) ─────────────────────────────────────────────────
-const HISTORY_KEY = "pizzaria_ra_orders";
-
-function loadHistory() {
-  try {
-    return JSON.parse(localStorage.getItem(HISTORY_KEY) || "[]");
-  } catch {
-    return [];
-  }
-}
-
-async function saveOrderToHistory(orderData) {
+async function sendOrderToWhatsApp(orderData) {
+  // 1. Salvar no Firestore primeiro para obter o ID
   const firestoreId = await salvarPedido(orderData);
+
+  // 2. Guardar no localStorage
   if (firestoreId) {
     try {
       localStorage.setItem("pizzaria_ra_last_order_id", firestoreId);
@@ -813,6 +829,45 @@ async function saveOrderToHistory(orderData) {
     if (cache.length > 5) cache.splice(5);
     localStorage.setItem(CACHE_KEY, JSON.stringify(cache));
   } catch (_) {}
+
+  // 3. Gerar link de acompanhamento se tiver ID no Firestore
+  let trackingLine = "";
+  if (firestoreId) {
+    const base = window.location.href.replace(/\/[^\/]*$/, "/");
+    const trackingUrl = base + "acompanhar.html?id=" + firestoreId;
+    trackingLine =
+      "\n\n━━━━━━━━━━━━━━━━━━━━\n\n🔍 *Acompanhe seu pedido em tempo real:*\n" +
+      trackingUrl;
+  }
+
+  // 4. Abrir WhatsApp com o link de acompanhamento
+  const message = encodeURIComponent(orderData.whatsappText + trackingLine);
+  window.open("https://wa.me/63992863557?text=" + message, "_blank");
+
+  // 5. Limpar estado
+  cart.length = 0;
+  changeValue.value = "";
+  changeInfo.style.display = "none";
+  customerName.value = "";
+  customerPhone.value = "";
+  customerNameWarn.style.display = "none";
+  customerPhoneWarn.style.display = "none";
+  customerName.classList.remove("input-error");
+  customerPhone.classList.remove("input-error");
+  pendingOrderData = null;
+  updateCartModal();
+  cartModal.classList.remove("active");
+}
+
+// ─── HISTÓRICO (localStorage) ─────────────────────────────────────────────────
+const HISTORY_KEY = "pizzaria_ra_orders";
+
+function loadHistory() {
+  try {
+    return JSON.parse(localStorage.getItem(HISTORY_KEY) || "[]");
+  } catch {
+    return [];
+  }
 }
 
 function openHistoryModal() {

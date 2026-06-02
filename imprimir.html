@@ -1,303 +1,482 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-BR">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Comanda de Produção</title>
-<style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Comanda de Produção</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
 
-  body {
-    background: #e5e5e5;
-    font-family: 'Courier New', Courier, monospace;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 24px 16px 60px;
-    min-height: 100vh;
-  }
+      body {
+        background: #e5e5e5;
+        font-family: "Courier New", Courier, monospace;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 24px 16px 60px;
+        min-height: 100vh;
+      }
 
-  .top-bar {
-    width: 100%;
-    max-width: 400px;
-    display: flex;
-    gap: 10px;
-    margin-bottom: 20px;
-  }
+      .top-bar {
+        width: 100%;
+        max-width: 400px;
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+      }
 
-  .btn-print {
-    flex: 1;
-    background: #ff6b00;
-    color: #fff;
-    border: none;
-    border-radius: 10px;
-    padding: 14px;
-    font-size: 1rem;
-    font-weight: 700;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-  }
-  .btn-print:hover { background: #e05c00; }
+      .btn-print {
+        flex: 1;
+        background: #ff6b00;
+        color: #fff;
+        border: none;
+        border-radius: 10px;
+        padding: 14px;
+        font-size: 1rem;
+        font-weight: 700;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+      }
+      .btn-print:hover {
+        background: #e05c00;
+      }
 
-  .btn-close {
-    background: #555;
-    color: #fff;
-    border: none;
-    border-radius: 10px;
-    padding: 14px 18px;
-    font-size: 1rem;
-    font-weight: 700;
-    cursor: pointer;
-  }
-  .btn-close:hover { background: #333; }
+      .btn-close {
+        background: #555;
+        color: #fff;
+        border: none;
+        border-radius: 10px;
+        padding: 14px 18px;
+        font-size: 1rem;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      .btn-close:hover {
+        background: #333;
+      }
 
-  /* COMANDA — otimizada para impressora térmica 58mm */
-  .cupom {
-    width: 260px;
-    background: #fff;
-    padding: 10px 8px;
-    font-size: 13px;        /* base maior para térmica */
-    line-height: 1.6;
-    color: #000;
-    box-shadow: 0 4px 20px rgba(0,0,0,.18);
-    border-radius: 4px;
-  }
+      /* ── COMANDA — otimizada para térmica 58mm ── */
+      .cupom {
+        width: 260px;
+        background: #fff;
+        padding: 10px 8px;
+        font-size: 13px;
+        line-height: 1.6;
+        color: #000;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.18);
+        border-radius: 4px;
+      }
 
-  .cupom .logo {
-    text-align: center;
-    font-size: 18px;
-    font-weight: 900;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    margin-bottom: 3px;
-  }
-  .cupom .subtitulo {
-    text-align: center;
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    background: #000;
-    color: #fff;
-    padding: 3px 4px;
-    margin-bottom: 6px;
-  }
+      .cupom .logo {
+        text-align: center;
+        font-size: 17px;
+        font-weight: 900;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        margin-bottom: 3px;
+      }
+      .cupom .subtitulo {
+        text-align: center;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        background: #000;
+        color: #fff;
+        padding: 3px 4px;
+        margin-bottom: 6px;
+      }
 
-  .cupom .sep {
-    border: none;
-    border-top: 1px dashed #000;
-    margin: 6px 0;
-  }
-  .cupom .sep-solid {
-    border: none;
-    border-top: 2px solid #000;
-    margin: 6px 0;
-  }
+      .cupom .sep {
+        border: none;
+        border-top: 1px dashed #000;
+        margin: 6px 0;
+      }
+      .cupom .sep-solid {
+        border: none;
+        border-top: 2px solid #000;
+        margin: 6px 0;
+      }
 
-  .cupom .row {
-    display: flex;
-    justify-content: space-between;
-    gap: 4px;
-  }
-  .cupom .label { font-weight: 700; }
-  .cupom .center { text-align: center; }
-  .cupom .bold { font-weight: 900; }
+      .cupom .row {
+        display: flex;
+        justify-content: space-between;
+        gap: 4px;
+      }
+      .cupom .bold {
+        font-weight: 900;
+      }
 
-  /* NÚMERO DO PEDIDO — destaque máximo */
-  .cupom .pedido-num {
-    font-size: 28px;
-    font-weight: 900;
-    text-align: center;
-    margin: 6px 0 3px;
-    letter-spacing: 2px;
-    border: 3px solid #000;
-    padding: 4px 0;
-  }
+      /* NÚMERO DO PEDIDO */
+      .cupom .pedido-num {
+        font-size: 28px;
+        font-weight: 900;
+        text-align: center;
+        margin: 6px 0 3px;
+        letter-spacing: 2px;
+        border: 3px solid #000;
+        padding: 4px 0;
+      }
 
-  /* ITENS — foco total na cozinha */
-  .cupom .itens-titulo {
-    font-size: 14px;
-    font-weight: 900;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    margin: 6px 0 4px;
-  }
-  .cupom .item-nome {
-    font-weight: 900;
-    font-size: 15px;       /* nome do item bem grande */
-    margin-top: 7px;
-    background: #000;
-    color: #fff;
-    padding: 4px 6px;
-    border-radius: 2px;
-  }
-  .cupom .item-detalhe {
-    padding-left: 10px;
-    font-size: 13px;
-    color: #000;
-    font-weight: 700;
-    margin-top: 2px;
-  }
-  .cupom .item-obs {
-    padding-left: 10px;
-    font-size: 13px;
-    font-weight: 900;
-    color: #000;
-    border-left: 3px solid #000;
-    margin: 3px 0 3px 10px;
-  }
+      /* HORA */
+      .cupom .hora {
+        text-align: center;
+        font-size: 11px;
+        margin-bottom: 4px;
+        font-weight: 700;
+      }
 
-  /* TIPO DE ENTREGA */
-  .cupom .entrega-box {
-    border: 3px solid #000;
-    padding: 6px 8px;
-    margin: 8px 0 6px;
-    font-weight: 900;
-    font-size: 15px;
-    text-align: center;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-  }
+      /* ITENS */
+      .cupom .itens-titulo {
+        font-size: 13px;
+        font-weight: 900;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin: 6px 0 4px;
+      }
 
-  /* CLIENTE (rodapé discreto) */
-  .cupom .cliente-box {
-    font-size: 12px;
-    margin-top: 6px;
-    padding-top: 4px;
-    border-top: 1px dashed #000;
-    color: #333;
-    text-align: center;
-  }
+      /* Bloco de cada item */
+      .cupom .item-bloco {
+        margin-bottom: 8px;
+        border-bottom: 1px dashed #aaa;
+        padding-bottom: 6px;
+      }
+      .cupom .item-bloco:last-child {
+        border-bottom: none;
+      }
 
-  /* erro */
-  #error-box {
-    background: #fff;
-    border-radius: 12px;
-    padding: 32px 24px;
-    max-width: 360px;
-    text-align: center;
-    box-shadow: 0 4px 20px rgba(0,0,0,.15);
-  }
-  #error-box h2 { color: #e53e3e; margin-bottom: 12px; }
+      .cupom .item-nome {
+        font-weight: 900;
+        font-size: 14px;
+        background: #000;
+        color: #fff;
+        padding: 3px 6px;
+        border-radius: 2px;
+        margin-bottom: 3px;
+        display: flex;
+        justify-content: space-between;
+      }
+      .cupom .item-qtd {
+        font-size: 13px;
+        font-weight: 900;
+      }
 
-  /* IMPRESSÃO — térmica 58mm */
-  @media print {
-    body { background: #fff; padding: 0; display: block; }
-    .top-bar { display: none; }
-    .cupom {
-      width: 100%;
-      box-shadow: none;
-      border-radius: 0;
-      font-size: 13px;
-      padding: 4px 3px;
-    }
-    @page {
-      size: 58mm auto;
-      margin: 1mm 2mm;
-    }
-  }
-</style>
-</head>
-<body>
+      /* Tamanho da pizza */
+      .cupom .item-tamanho {
+        font-size: 12px;
+        font-weight: 900;
+        padding-left: 8px;
+        margin-top: 2px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
 
-<div id="app"></div>
+      /* Metade/segundo sabor */
+      .cupom .item-metade {
+        font-size: 12px;
+        font-weight: 700;
+        padding-left: 8px;
+        margin-top: 1px;
+      }
+      .cupom .item-metade::before {
+        content: "1/2 METADE: ";
+        font-weight: 900;
+      }
 
-<script>
-(function() {
-  const app = document.getElementById('app');
+      /* Adicionais */
+      .cupom .item-extra {
+        font-size: 12px;
+        font-weight: 700;
+        padding-left: 8px;
+        margin-top: 1px;
+      }
+      .cupom .item-extra::before {
+        content: "+ ";
+        font-weight: 900;
+      }
 
-  /* 1. Pegar dados da URL */
-  const params = new URLSearchParams(window.location.search);
-  const raw    = params.get('d');
+      /* Observacao / remocoes */
+      .cupom .item-obs {
+        font-size: 12px;
+        font-weight: 900;
+        padding: 3px 6px;
+        border-left: 3px solid #000;
+        margin: 3px 0 2px 8px;
+        background: #f0f0f0;
+      }
+      .cupom .item-obs::before {
+        content: "OBS: ";
+      }
 
-  if (!raw) {
-    app.innerHTML = `<div id="error-box">
-      <h2>⚠️ Link inválido</h2>
-      <p>Este link não contém dados do pedido.<br>Solicite um novo link ao fazer o pedido.</p>
+      /* TIPO DE ENTREGA */
+      .cupom .entrega-box {
+        border: 3px solid #000;
+        padding: 6px 8px;
+        margin: 8px 0 4px;
+        font-weight: 900;
+        font-size: 15px;
+        text-align: center;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+
+      /* Endereco (delivery) */
+      .cupom .endereco-box {
+        font-size: 11px;
+        font-weight: 700;
+        padding: 4px 6px;
+        border: 1px solid #000;
+        margin-bottom: 4px;
+        line-height: 1.5;
+      }
+      .cupom .endereco-box .end-label {
+        font-weight: 900;
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      /* Pagamento */
+      .cupom .pag-linha {
+        font-size: 12px;
+        font-weight: 700;
+        margin: 2px 0;
+      }
+
+      /* CLIENTE (rodape) */
+      .cupom .cliente-box {
+        font-size: 11px;
+        margin-top: 6px;
+        padding-top: 4px;
+        border-top: 1px dashed #000;
+        color: #333;
+        text-align: center;
+        line-height: 1.5;
+      }
+
+      /* erro */
+      #error-box {
+        background: #fff;
+        border-radius: 12px;
+        padding: 32px 24px;
+        max-width: 360px;
+        text-align: center;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+      }
+      #error-box h2 {
+        color: #e53e3e;
+        margin-bottom: 12px;
+      }
+
+      /* ── IMPRESSAO termica 58mm ── */
+      @media print {
+        body {
+          background: #fff;
+          padding: 0;
+          display: block;
+        }
+        .top-bar {
+          display: none;
+        }
+        .cupom {
+          width: 100%;
+          box-shadow: none;
+          border-radius: 0;
+          font-size: 13px;
+          padding: 4px 3px;
+        }
+        @page {
+          size: 58mm auto;
+          margin: 1mm 2mm;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app"></div>
+
+    <script>
+      (function () {
+        const app = document.getElementById("app");
+
+        /* 1. Pegar dados da URL */
+        const params = new URLSearchParams(window.location.search);
+        const raw = params.get("d");
+
+        if (!raw) {
+          app.innerHTML = `<div id="error-box">
+      <h2>Link invalido</h2>
+      <p>Este link nao contem dados do pedido.<br>Solicite um novo link.</p>
     </div>`;
-    return;
-  }
+          return;
+        }
 
-  let order;
-  try {
-    order = JSON.parse(decodeURIComponent(atob(raw)));
-  } catch(e) {
-    app.innerHTML = `<div id="error-box">
-      <h2>⚠️ Erro ao ler pedido</h2>
-      <p>Os dados do link estão corrompidos.</p>
+        let order;
+        try {
+          order = JSON.parse(decodeURIComponent(atob(raw)));
+        } catch (e) {
+          app.innerHTML = `<div id="error-box">
+      <h2>Erro ao ler pedido</h2>
+      <p>Os dados do link estao corrompidos.</p>
     </div>`;
-    return;
-  }
+          return;
+        }
 
-  /* 2. Helpers */
-  function dateStr(iso) {
-    try { return new Date(iso).toLocaleString('pt-BR'); } catch(e) { return iso; }
-  }
+        /* 2. Helpers */
+        const tamLabels = { P: "PEQUENA", M: "MEDIA", G: "GRANDE" };
+        const pagLabels = {
+          pix: "PIX",
+          cartao: "CARTAO",
+          dinheiro: "DINHEIRO",
+        };
 
-  /* 3. Montar itens — apenas para produção (sem preços) */
-  let itensHTML = '';
-  order.items.forEach(item => {
-    itensHTML += `<div class="item-nome">${item.quantity}× ${item.name}</div>`;
+        function fmtHora(iso) {
+          try {
+            return new Date(iso).toLocaleString("pt-BR");
+          } catch (e) {
+            return "";
+          }
+        }
 
-    if (item.secondFlavor)
-      itensHTML += `<div class="item-detalhe">🍕 Metade: ${item.secondFlavor}</div>`;
+        /* 3. Montar itens com TODOS os detalhes para a cozinha */
+        let itensHTML = "";
+        const items = order.items || order.itens || order.cartSnapshot || [];
 
-    if (item.extras && item.extras.length > 0) {
-      item.extras.forEach(e => {
-        const el = typeof e === 'object' ? e.label : e;
-        itensHTML += `<div class="item-detalhe">➕ ${el}</div>`;
-      });
-    }
+        items.forEach((item) => {
+          const nome = item.name || item.nome || "—";
+          const qtd = item.quantity || item.quantidade || 1;
+          const tamanho = item.pizzaSize || item.tamanho || item.size || "";
+          const metade = item.secondFlavor || item.metade || "";
+          const extras = item.extras || [];
+          const obs = (item.obs || "").trim();
 
-    if (item.obs)
-      itensHTML += `<div class="item-obs">💬 ${item.obs}</div>`;
-  });
+          itensHTML += `<div class="item-bloco">`;
 
-  /* 4. Tipo de entrega (apenas delivery ou retirada — sem endereço) */
-  const orderLabels = { delivery: '🛵 DELIVERY', retirada: '🏪 RETIRADA' };
-  const tipoEntrega = orderLabels[order.orderType] || order.orderType.toUpperCase();
+          /* Nome + quantidade */
+          itensHTML += `<div class="item-nome">
+      <span>${nome}</span>
+      <span class="item-qtd">${qtd}x</span>
+    </div>`;
 
-  /* 5. Número do pedido */
-  const numPedido = String(order.id || Date.now()).slice(-4);
+          /* Tamanho */
+          if (tamanho)
+            itensHTML += `<div class="item-tamanho">TAMANHO: ${tamLabels[tamanho] || tamanho}</div>`;
 
-  /* 6. Comanda HTML — foco total na cozinha */
-  const cupomHTML = `
+          /* Segundo sabor / metade */
+          if (metade) itensHTML += `<div class="item-metade">${metade}</div>`;
+
+          /* Adicionais */
+          if (extras.length > 0) {
+            extras.forEach((e) => {
+              const label = typeof e === "object" ? e.label : e;
+              itensHTML += `<div class="item-extra">${label}</div>`;
+            });
+          }
+
+          /* Observacao / remocoes */
+          if (obs) itensHTML += `<div class="item-obs">${obs}</div>`;
+
+          itensHTML += `</div>`;
+        });
+
+        if (!itensHTML)
+          itensHTML = '<div style="padding:4px 0;">Sem itens</div>';
+
+        /* 4. Tipo de entrega */
+        const orderLabels = { delivery: "DELIVERY", retirada: "RETIRADA" };
+        const tipoEntrega =
+          orderLabels[order.orderType] || (order.orderType || "").toUpperCase();
+
+        /* 5. Endereco (apenas delivery) */
+        let enderecoHTML = "";
+        if (order.orderType === "delivery" && order.address) {
+          enderecoHTML = `<div class="endereco-box">
+      <div class="end-label">Endereco de entrega:</div>
+      <div>${order.address}</div>
+    </div>`;
+        }
+
+        /* 6. Pagamento */
+        const pagStr =
+          pagLabels[order.paymentType] ||
+          (order.paymentType || "").toUpperCase();
+        let pagHTML = `<div class="pag-linha">PGTO: ${pagStr}</div>`;
+        if (order.paymentType === "dinheiro" && order.troco) {
+          const troco = order.troco - order.total;
+          pagHTML += `<div class="pag-linha">TROCO PARA: R$ ${Number(order.troco).toFixed(2)}</div>`;
+          pagHTML += `<div class="pag-linha">TROCO: R$ ${troco.toFixed(2)}</div>`;
+        }
+
+        /* 7. Numero do pedido */
+        const numPedido = String(order.id || Date.now()).slice(-4);
+
+        /* 8. Hora do pedido */
+        const horaStr = fmtHora(order.date);
+
+        /* 9. Total */
+        const totalStr =
+          "R$ " +
+          Number(order.total || 0)
+            .toFixed(2)
+            .replace(".", ",");
+
+        /* 10. Montar comanda */
+        const cupomHTML = `
     <div class="cupom" id="cupom">
-      <div class="logo">🍕 Pizzaria RA</div>
-      <div class="subtitulo">— comanda de produção —</div>
+      <div class="logo">Pizzaria RA</div>
+      <div class="subtitulo">-- comanda de producao --</div>
 
       <div class="pedido-num">#${numPedido}</div>
+      ${horaStr ? `<div class="hora">${horaStr}</div>` : ""}
 
       <hr class="sep-solid">
 
-      <div class="itens-titulo">📋 Itens a Preparar:</div>
+      <div class="itens-titulo">ITENS A PREPARAR:</div>
       ${itensHTML}
 
       <hr class="sep">
 
       <div class="entrega-box">${tipoEntrega}</div>
 
+      ${enderecoHTML}
+
+      <div class="sep"></div>
+      ${pagHTML}
+
+      <div class="sep"></div>
+      <div class="row bold" style="font-size:14px;">
+        <span>TOTAL</span>
+        <span>${totalStr}</span>
+      </div>
+
       <div class="cliente-box">
-        ${order.customerName} | ${order.customerPhone}
+        <div>${order.customerName || ""}</div>
+        <div>${order.customerPhone || ""}</div>
       </div>
     </div>`;
 
-  /* 8. Renderizar */
-  app.innerHTML = `
+        /* 11. Renderizar */
+        app.innerHTML = `
     <div class="top-bar">
-      <button class="btn-print" onclick="window.print()">🖨️ Imprimir Comanda</button>
-      <button class="btn-close" onclick="window.close()">✕ Fechar</button>
+      <button class="btn-print" onclick="window.print()">Imprimir Comanda</button>
+      <button class="btn-close" onclick="window.close()">X Fechar</button>
     </div>
     ${cupomHTML}`;
 
-  /* 9. Auto print se veio com ?print=1 */
-  if (params.get('print') === '1') {
-    window.addEventListener('load', () => setTimeout(() => window.print(), 600));
-  }
-})();
-</script>
-</body>
+        /* 12. Auto print se veio com ?print=1 */
+        if (params.get("print") === "1") {
+          window.addEventListener("load", () =>
+            setTimeout(() => window.print(), 600),
+          );
+        }
+      })();
+    </script>
+  </body>
 </html>
