@@ -1137,7 +1137,11 @@
         <div class="form-row">
           <div class="form-group">
             <label class="form-label">Categoria</label>
-            <select id="prod-cat" class="form-input">
+            <select
+              id="prod-cat"
+              class="form-input"
+              onchange="toggleCampoPizza()"
+            >
               <option value="pizza">Pizza</option>
               <option value="hamburguer">Hambúrguer / Lanche</option>
               <option value="bebida">Bebida</option>
@@ -1170,6 +1174,64 @@
               />
               Produto ativo no cardápio
             </label>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Badge (opcional)</label>
+            <input
+              type="text"
+              id="prod-badge"
+              class="form-input"
+              placeholder="Ex: Popular, Especial"
+            />
+          </div>
+        </div>
+        <!-- Preços por tamanho — apenas pizzas -->
+        <div id="modal-pizza-precos" class="form-group">
+          <label class="form-label" style="margin-bottom: 0.5rem"
+            >🍕 Preços por Tamanho</label
+          >
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" style="font-size: 0.78rem"
+                >P (R$)</label
+              >
+              <input
+                type="number"
+                id="prod-preco-p"
+                class="form-input"
+                placeholder="33"
+                step="0.01"
+                min="0"
+              />
+            </div>
+            <div class="form-group">
+              <label class="form-label" style="font-size: 0.78rem"
+                >M (R$)</label
+              >
+              <input
+                type="number"
+                id="prod-preco-m"
+                class="form-input"
+                placeholder="43"
+                step="0.01"
+                min="0"
+              />
+            </div>
+            <div class="form-group">
+              <label class="form-label" style="font-size: 0.78rem"
+                >G (R$)</label
+              >
+              <input
+                type="number"
+                id="prod-preco-g"
+                class="form-input"
+                placeholder="48"
+                step="0.01"
+                min="0"
+              />
+            </div>
           </div>
         </div>
         <div class="form-group">

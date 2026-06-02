@@ -1,5 +1,6 @@
 // ─── FIREBASE ────────────────────────────────────────────────────────────────
 import { salvarPedido } from "./js/pedidos.js";
+import { watchProdutos } from "./js/produtos.js";
 
 // ─── ADICIONAIS DISPONÍVEIS ───────────────────────────────────────────────────
 const EXTRAS_LIST = [
@@ -933,41 +934,114 @@ if (isOpen) {
   spanItem.classList.add("closed");
 }
 
-// ─── ESGOTADO (controle via localStorage compartilhado com admin) ──────────────
-const SOLDOUT_KEY = "pizzaria_ra_soldout";
+// ─── MENU DINÂMICO — FIREBASE ─────────────────────────────────────────────────
+// Gera os cards do cardápio em tempo real a partir do Firestore.
+// Quando o admin marca um produto como esgotado, o site atualiza automaticamente.
 
-function loadSoldOut() {
-  try {
-    return JSON.parse(localStorage.getItem(SOLDOUT_KEY) || "[]");
-  } catch {
-    return [];
-  }
+// O menu usa event delegation em #menu → botões dinâmicos funcionam automaticamente
+function bindCartButtons() {
+  /* event delegation já ativo em #menu */
 }
 
-function applySoldOut() {
-  const soldOut = loadSoldOut();
-  document
-    .querySelectorAll(".product-card[data-product-name]")
-    .forEach((card) => {
-      const name = card.dataset.productName;
-      const isOut = soldOut.includes(name);
-      if (isOut) {
-        card.classList.add("esgotado");
-        const btn = card.querySelector(".add-td-cart-btn");
-        if (btn) btn.disabled = true;
-      } else {
-        card.classList.remove("esgotado");
-        const btn = card.querySelector(".add-td-cart-btn");
-        if (btn) btn.disabled = false;
-      }
+function buildProductCard(p) {
+  const esgotado = p.esgotado ? "esgotado" : "";
+  const isPizza = p.categoria === "pizza";
+  const pricesAttr =
+    isPizza && p.precos ? `data-prices='${JSON.stringify(p.precos)}'` : "";
+  const hasExtras = isPizza || p.categoria === "hamburguer" ? "true" : "false";
+  const badgeHtml = p.badge ? `<span class="badge-new">${p.badge}</span>` : "";
+  const priceDisplay = isPizza
+    ? "A partir R$ " + (p.preco || 30).toFixed(2).replace(".", ",")
+    : "R$ " + (p.preco || 0).toFixed(2).replace(".", ",");
+
+  return `
+    <div class="product-card ${esgotado}" data-product-name="${p.nome}">
+      <div class="product-img-wrap">
+        <div class="esgotado-overlay">
+          <i class="fa fa-ban"></i><span>Esgotado</span>
+        </div>
+        <img src="${p.imagem || "assets/img-01.jpg"}" alt="${p.nome}" class="product-img" />
+      </div>
+      <div class="product-body">
+        <p class="product-name">
+          ${p.nome} ${badgeHtml}
+          <span class="esgotado-badge">Esgotado</span>
+        </p>
+        <p class="product-desc">${p.descricao || ""}</p>
+        <div class="product-footer">
+          <span class="product-price">${priceDisplay}</span>
+          <button
+            class="add-cart-btn add-td-cart-btn"
+            data-name="${p.nome}"
+            data-price="${p.preco || 0}"
+            data-has-extras="${hasExtras}"
+            data-is-pizza="${isPizza}"
+            ${pricesAttr}
+            ${esgotado ? "disabled" : ""}
+            title="Adicionar"
+          >
+            <i class="fa fa-cart-plus"></i>
+          </button>
+        </div>
+      </div>
+    </div>`;
+}
+
+function populateSecondFlavorSelect(pizzas) {
+  const sel = document.getElementById("second-flavor-select");
+  if (!sel) return;
+  // Manter só a primeira opção "inteira"
+  sel.innerHTML = '<option value="">— Apenas um sabor (inteira) —</option>';
+  pizzas
+    .filter((p) => !p.esgotado)
+    .forEach((p) => {
+      const opt = document.createElement("option");
+      opt.value = p.nome;
+      opt.textContent = "🍕 " + p.nome.replace(/^Pizza\s+/i, "");
+      sel.appendChild(opt);
     });
 }
 
-// Aplicar ao carregar e escutar mudanças de outras abas (admin)
-document.addEventListener("DOMContentLoaded", applySoldOut);
-window.addEventListener("storage", (e) => {
-  if (e.key === SOLDOUT_KEY) applySoldOut();
-});
+function renderMenuFirebase(produtos) {
+  const loading = document.getElementById("menu-loading");
+  if (loading) loading.style.display = "none";
+
+  const categorias = {
+    pizza: { grid: "grid-pizzas", section: "section-pizzas" },
+    hamburguer: { grid: "grid-lanches", section: "section-lanches" },
+    bebida: { grid: "grid-bebidas", section: "section-bebidas" },
+  };
+
+  // Limpar grids
+  Object.values(categorias).forEach(({ grid, section }) => {
+    const g = document.getElementById(grid);
+    if (g) g.innerHTML = "";
+    const s = document.getElementById(section);
+    if (s) s.style.display = "none";
+  });
+
+  // Preencher cada categoria
+  produtos.forEach((p) => {
+    const cat = categorias[p.categoria];
+    if (!cat) return;
+    const grid = document.getElementById(cat.grid);
+    if (!grid) return;
+    grid.insertAdjacentHTML("beforeend", buildProductCard(p));
+    // Mostrar seção
+    const sec = document.getElementById(cat.section);
+    if (sec) sec.style.display = "";
+  });
+
+  // Atualizar select de segundo sabor
+  const pizzas = produtos.filter((p) => p.categoria === "pizza");
+  populateSecondFlavorSelect(pizzas);
+
+  // Re-vincular eventos dos botões de carrinho
+  bindCartButtons();
+}
+
+// Iniciar listener Firebase para o cardápio
+watchProdutos(renderMenuFirebase);
 
 // ─── EXPOR FUNÇÕES GLOBAIS (necessário com type="module") ─────────────────────
 window.scrollToSection = scrollToSection;
@@ -978,4 +1052,3 @@ window.clearHistory = clearHistory;
 window.closePIXModal = closePIXModal;
 window.confirmPIXPayment = confirmPIXPayment;
 window.copyPIXKey = copyPIXKey;
-window.applySoldOut = applySoldOut;

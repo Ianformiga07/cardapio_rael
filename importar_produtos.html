@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Importar Produtos — Pizzaria RA</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: sans-serif; background: #111; color: #eee; display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 2rem; }
+    .card { background: #1e1e1e; border-radius: 16px; padding: 2rem; max-width: 600px; width: 100%; box-shadow: 0 8px 32px #0008; }
+    h1 { font-size: 1.4rem; color: #f87171; margin-bottom: 0.5rem; }
+    p { font-size: 0.9rem; color: #9ca3af; margin-bottom: 1.5rem; }
+    button { width: 100%; padding: 0.9rem; border: none; border-radius: 10px; background: #dc2626; color: #fff; font-size: 1rem; font-weight: 700; cursor: pointer; transition: background 0.2s; }
+    button:hover:not(:disabled) { background: #b91c1c; }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+    #log { margin-top: 1.5rem; background: #111; border-radius: 10px; padding: 1rem; font-size: 0.78rem; font-family: monospace; max-height: 320px; overflow-y: auto; }
+    .ok  { color: #4ade80; }
+    .err { color: #f87171; }
+    .inf { color: #60a5fa; }
+    #resumo { margin-top: 1rem; font-size: 0.9rem; color: #a3e635; display: none; }
+  </style>
+</head>
+<body>
+<div class="card">
+  <h1>🍕 Importar Produtos — Pizzaria RA</h1>
+  <p>Clique no botão abaixo para cadastrar todos os produtos no Firebase automaticamente. Produtos que já existem com o mesmo nome <strong>não serão duplicados</strong>.</p>
+  <button id="btn" onclick="iniciarImportacao()">▶ Iniciar Importação</button>
+  <div id="resumo"></div>
+  <div id="log"></div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import {
+    getFirestore, collection, addDoc, getDocs, query, where, serverTimestamp
+  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  // ── MESMAS CREDENCIAIS DO SEU PROJETO ──────────────────────────────────────
+  const firebaseConfig = {
+    apiKey: "AIzaSyBm9XjET1VETadadyq9MOSij1f4ND_4SI4",
+    authDomain: "pizzaria-rael.firebaseapp.com",
+    projectId: "pizzaria-rael",
+    storageBucket: "pizzaria-rael.firebasestorage.app",
+    messagingSenderId: "737517289116",
+    appId: "1:737517289116:web:1a49ac56da1b21e25b3759",
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db  = getFirestore(app);
+
+  // ── LISTA COMPLETA DE PRODUTOS ──────────────────────────────────────────────
+  const PRODUTOS = [
+    // ── PIZZAS ────────────────────────────────────────────────────────────────
+    {
+      nome: "Pizza Moda da Casa",
+      descricao: "Molho, Presunto, Mussarela, Azeitona, Orégano, Bacon, Calabresa, Milho e Tomate",
+      preco: 33, categoria: "pizza", imagem: "assets/moda.jpeg",
+      badge: "Popular", precos: { P: 33, M: 43, G: 48 },
+    },
+    {
+      nome: "Pizza Calabresa",
+      descricao: "Molho, Presunto, Mussarela, Calabresa, Tomate, Milho, Azeitona e Orégano",
+      preco: 33, categoria: "pizza", imagem: "assets/calabresa.jpeg",
+      badge: "", precos: { P: 33, M: 43, G: 48 },
+    },
+    {
+      nome: "Pizza Calabresa c/ Barbecue",
+      descricao: "Molho, Presunto, Mussarela, Calabresa, Barbecue, Cebola, Tomate, Milho, Azeitona e Orégano",
+      preco: 34, categoria: "pizza", imagem: "assets/img-02.jpg",
+      badge: "", precos: { P: 34, M: 44, G: 50 },
+    },
+    {
+      nome: "Pizza Frango c/ Catupiry",
+      descricao: "Molho, Mussarela, Frango Desfiado, Catupiry, Milho e Orégano",
+      preco: 34, categoria: "pizza", imagem: "assets/img-01.jpg",
+      badge: "", precos: { P: 34, M: 44, G: 50 },
+    },
+    {
+      nome: "Pizza Frango c/ Creme de Leite",
+      descricao: "Molho, Mussarela, Frango Desfiado, Creme de Leite, Milho e Orégano",
+      preco: 34, categoria: "pizza", imagem: "assets/img-01.jpg",
+      badge: "", precos: { P: 34, M: 44, G: 50 },
+    },
+    {
+      nome: "Pizza 2 Queijos",
+      descricao: "Molho, Mussarela, Cheddar, Orégano e Azeitona",
+      preco: 33, categoria: "pizza", imagem: "assets/img-02.jpg",
+      badge: "", precos: { P: 33, M: 43, G: 48 },
+    },
+    {
+      nome: "Pizza Portuguesa",
+      descricao: "Molho, Presunto, Mussarela, Ovo, Cebola, Azeitona, Tomate e Orégano",
+      preco: 34, categoria: "pizza", imagem: "assets/img-01.jpg",
+      badge: "", precos: { P: 34, M: 44, G: 50 },
+    },
+    {
+      nome: "Pizza Carne Seca",
+      descricao: "Molho, Mussarela, Carne Seca, Cebola, Tomate e Orégano",
+      preco: 34, categoria: "pizza", imagem: "assets/img-02.jpg",
+      badge: "", precos: { P: 34, M: 44, G: 50 },
+    },
+    {
+      nome: "Pizza Carne Seca com Banana",
+      descricao: "Molho, Mussarela, Carne Seca, Banana, Cebola e Orégano",
+      preco: 34, categoria: "pizza", imagem: "assets/img-01.jpg",
+      badge: "", precos: { P: 34, M: 44, G: 50 },
+    },
+    {
+      nome: "Pizza Francesa",
+      descricao: "Molho, Presunto, Mussarela, Milho, Ervilha e Orégano",
+      preco: 33, categoria: "pizza", imagem: "assets/img-02.jpg",
+      badge: "", precos: { P: 33, M: 43, G: 48 },
+    },
+    {
+      nome: "Pizza Presunto e Musarela",
+      descricao: "Molho, Presunto, Mussarela e Orégano",
+      preco: 33, categoria: "pizza", imagem: "assets/img-01.jpg",
+      badge: "", precos: { P: 33, M: 43, G: 48 },
+    },
+
+    // ── LANCHES ───────────────────────────────────────────────────────────────
+    {
+      nome: "Bauru",
+      descricao: "Pão, Presunto, Mussarela, Tomate, Batata Palha e Milho",
+      preco: 8, categoria: "hamburguer", imagem: "assets/hamb-1.png", badge: "",
+    },
+    {
+      nome: "X-Salada",
+      descricao: "Pão, Hambúrguer, Mussarela, Tomate, Alface, Batata Palha e Presunto",
+      preco: 13, categoria: "hamburguer", imagem: "assets/hamb-2.png", badge: "",
+    },
+    {
+      nome: "X-Calabresa",
+      descricao: "Pão, Hambúrguer, Mussarela, Calabresa, Tomate, Batata Palha e Presunto",
+      preco: 16, categoria: "hamburguer", imagem: "assets/hamb-3.png", badge: "",
+    },
+    {
+      nome: "X-Salada c/ Catupiri",
+      descricao: "Pão, Hambúrguer, Mussarela, Catupiry, Tomate, Alface, Batata Palha e Presunto",
+      preco: 16, categoria: "hamburguer", imagem: "assets/hamb-2.png", badge: "",
+    },
+    {
+      nome: "X-Bacon",
+      descricao: "Pão, Hambúrguer, Mussarela, Bacon, Tomate, Alface e Batata Palha",
+      preco: 16, categoria: "hamburguer", imagem: "assets/hamb-3.png", badge: "",
+    },
+    {
+      nome: "X-Cheddar",
+      descricao: "Pão, Hambúrguer, Mussarela, Cheddar, Tomate, Alface e Batata Palha",
+      preco: 16, categoria: "hamburguer", imagem: "assets/hamb-2.png", badge: "",
+    },
+    {
+      nome: "X-Tudo",
+      descricao: "Pão, Hambúrguer, Mussarela, Bacon, Ovo, Presunto, Tomate, Alface e Batata Palha",
+      preco: 19, categoria: "hamburguer", imagem: "assets/hamb-3.png", badge: "",
+    },
+    {
+      nome: "X-Bacon c/ Catupiry",
+      descricao: "Pão, Hambúrguer, Mussarela, Bacon, Catupiry, Tomate, Alface e Batata Palha",
+      preco: 19, categoria: "hamburguer", imagem: "assets/hamb-2.png", badge: "",
+    },
+    {
+      nome: "X-Calabresa c/ Cheddar",
+      descricao: "Pão, Hambúrguer, Mussarela, Calabresa, Cheddar, Tomate e Batata Palha",
+      preco: 19, categoria: "hamburguer", imagem: "assets/hamb-3.png", badge: "",
+    },
+    {
+      nome: "X-R.A.",
+      descricao: "Pão, 2 Hambúrgueres, Mussarela, Cheddar, Bacon, Ovo, Presunto, Tomate, Alface e Batata Palha",
+      preco: 20, categoria: "hamburguer", imagem: "assets/hamb-2.png", badge: "Especial",
+    },
+
+    // ── BEBIDAS ───────────────────────────────────────────────────────────────
+    {
+      nome: "Suco de Laranja 500ml",
+      descricao: "Natural 500ml",
+      preco: 13, categoria: "bebida", imagem: "assets/suco.png", badge: "",
+    },
+    {
+      nome: "Coca-Cola 2L",
+      descricao: "Garrafa 2 litros",
+      preco: 15, categoria: "bebida", imagem: "assets/coca-2l.png", badge: "",
+    },
+    {
+      nome: "Coca-Cola 1L",
+      descricao: "Garrafa 1 litro",
+      preco: 12, categoria: "bebida", imagem: "assets/coca-1l.png", badge: "",
+    },
+    {
+      nome: "Guaraná 2L",
+      descricao: "Garrafa 2 litros",
+      preco: 15, categoria: "bebida", imagem: "assets/guarana-2l.png", badge: "",
+    },
+    {
+      nome: "Guaraná 1L",
+      descricao: "Garrafa 1 litro",
+      preco: 10, categoria: "bebida", imagem: "assets/guarana-1l.png", badge: "",
+    },
+    {
+      nome: "Coca-Cola Lata",
+      descricao: "Lata 350ml gelada",
+      preco: 6, categoria: "bebida", imagem: "assets/coca-lata.png", badge: "",
+    },
+    {
+      nome: "Guaraná Lata",
+      descricao: "Lata 350ml gelada",
+      preco: 6, categoria: "bebida", imagem: "assets/guarana-lata.png", badge: "",
+    },
+    {
+      nome: "Água s/ Gás",
+      descricao: "Garrafa gelada",
+      preco: 3, categoria: "bebida", imagem: "assets/agua.png", badge: "",
+    },
+    {
+      nome: "Coca-Cola Lata Zero",
+      descricao: "Lata 350ml sem açúcar",
+      preco: 6.5, categoria: "bebida", imagem: "assets/coca-zero.png", badge: "",
+    },
+  ];
+
+  // ── LÓGICA DE IMPORTAÇÃO ────────────────────────────────────────────────────
+  window.iniciarImportacao = async function () {
+    const btn = document.getElementById("btn");
+    const logEl = document.getElementById("log");
+    const resumoEl = document.getElementById("resumo");
+
+    btn.disabled = true;
+    btn.textContent = "⏳ Importando...";
+    logEl.innerHTML = "";
+    resumoEl.style.display = "none";
+
+    function log(msg, tipo = "inf") {
+      const line = document.createElement("div");
+      line.className = tipo;
+      line.textContent = msg;
+      logEl.appendChild(line);
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    log("🔍 Verificando produtos já cadastrados...");
+
+    // Buscar nomes já existentes para evitar duplicatas
+    const snap = await getDocs(collection(db, "produtos"));
+    const nomesExistentes = new Set(snap.docs.map(d => d.data().nome));
+    log(`ℹ️  ${nomesExistentes.size} produto(s) já existem no banco.`);
+
+    let adicionados = 0;
+    let pulados = 0;
+    let erros = 0;
+
+    for (const p of PRODUTOS) {
+      if (nomesExistentes.has(p.nome)) {
+        log(`⏭  Pulado (já existe): ${p.nome}`, "inf");
+        pulados++;
+        continue;
+      }
+
+      try {
+        await addDoc(collection(db, "produtos"), {
+          nome: p.nome,
+          descricao: p.descricao,
+          preco: p.preco,
+          categoria: p.categoria,
+          imagem: p.imagem,
+          badge: p.badge || "",
+          precos: p.precos || null,
+          estoque: 99,
+          esgotado: false,
+          ativo: true,
+          criadoEm: serverTimestamp(),
+        });
+        log(`✅ Adicionado: ${p.nome}`, "ok");
+        adicionados++;
+      } catch (err) {
+        log(`❌ Erro ao adicionar "${p.nome}": ${err.message}`, "err");
+        erros++;
+      }
+    }
+
+    log("─────────────────────────────");
+    log(`🏁 Concluído! ✅ ${adicionados} adicionados | ⏭ ${pulados} pulados | ❌ ${erros} erros`, adicionados > 0 ? "ok" : "inf");
+
+    resumoEl.textContent = `✅ ${adicionados} produtos importados com sucesso! Você já pode fechar esta página.`;
+    resumoEl.style.display = "block";
+    btn.textContent = "✔ Importação Concluída";
+  };
+</script>
+</body>
+</html>

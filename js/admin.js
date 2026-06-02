@@ -266,6 +266,14 @@ window._adminEditarProduto = (id) => {
   abrirModalProduto(p);
 };
 
+// Mostrar/ocultar campos específicos de pizza no modal
+function toggleCampoPizza() {
+  const cat = document.getElementById("prod-cat")?.value;
+  const secPizza = document.getElementById("modal-pizza-precos");
+  if (secPizza) secPizza.style.display = cat === "pizza" ? "" : "none";
+}
+window.toggleCampoPizza = toggleCampoPizza;
+
 // ─── MODAL PRODUTO (cadastro / edição) ───────────────────────────────────────
 export function abrirModalProduto(produto = null) {
   const modal = document.getElementById("modal-produto");
@@ -281,8 +289,18 @@ export function abrirModalProduto(produto = null) {
   document.getElementById("prod-preco").value = produto?.preco || "";
   document.getElementById("prod-imagem").value = produto?.imagem || "";
   document.getElementById("prod-cat").value = produto?.categoria || "pizza";
-  document.getElementById("prod-estoque").value = produto?.estoque ?? 1;
+  document.getElementById("prod-estoque").value = produto?.estoque ?? 99;
   document.getElementById("prod-ativo").checked = produto?.ativo ?? true;
+  document.getElementById("prod-badge").value = produto?.badge || "";
+
+  // Campos de preço por tamanho (pizza)
+  const precos = produto?.precos || {};
+  document.getElementById("prod-preco-p").value = precos.P || "";
+  document.getElementById("prod-preco-m").value = precos.M || "";
+  document.getElementById("prod-preco-g").value = precos.G || "";
+
+  // Mostrar/ocultar campos de pizza
+  toggleCampoPizza();
 
   modal.classList.add("active");
 }
@@ -293,15 +311,28 @@ export function fecharModalProduto() {
 
 export async function salvarProduto() {
   const id = document.getElementById("prod-id").value;
+  const categoria = document.getElementById("prod-cat").value;
+
   const dados = {
     nome: document.getElementById("prod-nome").value.trim(),
     descricao: document.getElementById("prod-desc").value.trim(),
     preco: parseFloat(document.getElementById("prod-preco").value) || 0,
     imagem: document.getElementById("prod-imagem").value.trim(),
-    categoria: document.getElementById("prod-cat").value,
+    categoria,
     estoque: parseInt(document.getElementById("prod-estoque").value) || 0,
     ativo: document.getElementById("prod-ativo").checked,
+    badge: document.getElementById("prod-badge").value.trim(),
   };
+
+  // Preços por tamanho (só para pizza)
+  if (categoria === "pizza") {
+    const p = parseFloat(document.getElementById("prod-preco-p").value) || 0;
+    const m = parseFloat(document.getElementById("prod-preco-m").value) || 0;
+    const g = parseFloat(document.getElementById("prod-preco-g").value) || 0;
+    if (p || m || g) {
+      dados.precos = { P: p, M: m, G: g };
+    }
+  }
 
   if (!dados.nome) {
     alert("Informe o nome do produto.");
