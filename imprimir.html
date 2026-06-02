@@ -105,19 +105,8 @@
         margin: 6px 0;
       }
 
-      .cupom .row {
-        display: flex;
-        justify-content: space-between;
-        gap: 4px;
-      }
-      .cupom .label {
-        font-weight: 700;
-      }
       .cupom .center {
         text-align: center;
-      }
-      .cupom .bold {
-        font-weight: 900;
       }
 
       /* NÚMERO DO PEDIDO */
@@ -140,68 +129,57 @@
         margin: 6px 0 4px;
       }
 
-      /* bloco do item */
+      /* Bloco de cada item — caixa com borda */
       .cupom .item-bloco {
-        margin-top: 8px;
         border: 2px solid #000;
         border-radius: 2px;
+        margin-top: 7px;
         overflow: hidden;
       }
 
+      /* Nome do item — fundo preto, letra branca, bem grande */
       .cupom .item-nome {
         font-weight: 900;
         font-size: 14px;
         background: #000;
         color: #fff;
-        padding: 4px 6px;
+        padding: 4px 7px;
       }
 
-      .cupom .item-detalhe {
-        padding: 2px 8px;
-        font-size: 12px;
-        color: #000;
-        font-weight: 700;
-        border-bottom: 1px dashed #ccc;
-      }
-      .cupom .item-detalhe:last-child {
-        border-bottom: none;
-      }
-
-      /* TAMANHO da pizza — destaque */
+      /* Tamanho da pizza — fundo cinza claro */
       .cupom .item-tamanho {
-        padding: 3px 8px;
-        font-size: 13px;
         font-weight: 900;
-        background: #f0f0f0;
+        font-size: 13px;
+        background: #e8e8e8;
+        padding: 3px 7px;
         border-bottom: 1px solid #ccc;
+        text-transform: uppercase;
         letter-spacing: 0.5px;
       }
 
-      /* METADE da pizza */
+      /* Segunda metade da pizza */
       .cupom .item-metade {
-        padding: 3px 8px;
-        font-size: 12px;
         font-weight: 900;
-        border-bottom: 1px dashed #ccc;
-      }
-
-      /* EXTRAS / adicionais */
-      .cupom .item-extra {
-        padding: 2px 8px;
-        font-size: 12px;
-        font-weight: 700;
-        border-bottom: 1px dashed #ccc;
-        color: #000;
-      }
-
-      /* OBSERVAÇÃO — destaque máximo para a cozinha */
-      .cupom .item-obs {
-        padding: 4px 8px;
         font-size: 13px;
+        padding: 3px 7px;
+        border-bottom: 1px dashed #aaa;
+      }
+
+      /* Adicionais / extras */
+      .cupom .item-extra {
+        font-weight: 700;
+        font-size: 12px;
+        padding: 2px 7px;
+        border-bottom: 1px dashed #ccc;
+      }
+
+      /* Observação — fundo PRETO destaque máximo para cozinha */
+      .cupom .item-obs {
         font-weight: 900;
+        font-size: 13px;
+        padding: 4px 7px;
         background: #000;
         color: #fff;
-        border-top: 2px solid #000;
         letter-spacing: 0.3px;
       }
 
@@ -209,7 +187,7 @@
       .cupom .entrega-box {
         border: 3px solid #000;
         padding: 6px 8px;
-        margin: 8px 0 6px;
+        margin: 8px 0 4px;
         font-weight: 900;
         font-size: 15px;
         text-align: center;
@@ -219,7 +197,7 @@
 
       /* ENDEREÇO (delivery) */
       .cupom .endereco-box {
-        font-size: 12px;
+        font-size: 11px;
         font-weight: 700;
         padding: 4px 6px;
         border: 1px dashed #000;
@@ -235,6 +213,7 @@
         border-top: 1px dashed #000;
         color: #333;
         text-align: center;
+        line-height: 1.6;
       }
 
       /* ERRO */
@@ -306,45 +285,45 @@
         }
 
         /* 2. Helpers */
-        const sizeLabels = { P: "📏 PEQUENA", M: "📏 MÉDIA", G: "📏 GRANDE" };
+        const sizeLabels = { P: "PEQUENA", M: "MÉDIA", G: "GRANDE" };
 
-        /* 3. Montar itens — todos os detalhes para a cozinha */
+        /* 3. Montar itens — TODOS os detalhes para a cozinha */
         let itensHTML = "";
+
         order.items.forEach((item) => {
-          let blocoDetalhes = "";
+          let detalhes = "";
 
-          // Tamanho da pizza
-          if (item.pizzaSize) {
-            const tamLabel =
-              sizeLabels[item.pizzaSize] || "📏 " + item.pizzaSize;
-            blocoDetalhes += `<div class="item-tamanho">${tamLabel}</div>`;
+          // ── Tamanho da pizza (P / M / G)
+          if (item.pizzaSize && item.pizzaSize.trim()) {
+            const tam = sizeLabels[item.pizzaSize] || item.pizzaSize;
+            detalhes += `<div class="item-tamanho">📏 TAMANHO: ${tam}</div>`;
           }
 
-          // Metade (segundo sabor)
+          // ── Segunda metade (pizza meio-a-meio)
           if (item.secondFlavor && item.secondFlavor.trim()) {
-            blocoDetalhes += `<div class="item-metade">🍕 METADE 2: ${item.secondFlavor}</div>`;
+            detalhes += `<div class="item-metade">🍕 METADE 2: ${item.secondFlavor}</div>`;
           }
 
-          // Extras / adicionais
+          // ── Adicionais / extras
           if (item.extras && item.extras.length > 0) {
             item.extras.forEach((e) => {
-              const el =
-                typeof e === "object"
-                  ? e.label || e.name || JSON.stringify(e)
-                  : e;
-              blocoDetalhes += `<div class="item-extra">➕ ${el}</div>`;
+              const label =
+                typeof e === "object" ? e.label || e.name || "" : String(e);
+              if (label.trim()) {
+                detalhes += `<div class="item-extra">➕ ${label}</div>`;
+              }
             });
           }
 
-          // Observação — fundo preto para máximo destaque
+          // ── Observação (ingredientes a retirar, pedidos especiais etc.)
           if (item.obs && item.obs.trim()) {
-            blocoDetalhes += `<div class="item-obs">⚠️ OBS: ${item.obs.trim()}</div>`;
+            detalhes += `<div class="item-obs">⚠️ OBS: ${item.obs.trim().toUpperCase()}</div>`;
           }
 
           itensHTML += `
       <div class="item-bloco">
         <div class="item-nome">${item.quantity}× ${item.name}</div>
-        ${blocoDetalhes}
+        ${detalhes}
       </div>`;
         });
 
@@ -362,14 +341,16 @@
             ? `<div class="endereco-box">📍 ${order.address}</div>`
             : "";
 
-        /* 6. Número do pedido */
-        const numPedido = String(order.id || Date.now()).slice(-4);
+        /* 6. Número do pedido (4 últimos caracteres) */
+        const numPedido = String(order.id || Date.now())
+          .slice(-4)
+          .toUpperCase();
 
         /* 7. Data/hora */
         let dataHora = "";
         try {
           dataHora = new Date(order.date).toLocaleString("pt-BR");
-        } catch (e) {}
+        } catch (_) {}
 
         /* 8. Comanda HTML */
         const cupomHTML = `
@@ -378,7 +359,7 @@
       <div class="subtitulo">— comanda de produção —</div>
 
       <div class="pedido-num">#${numPedido}</div>
-      <div class="center" style="font-size:11px;margin-bottom:4px;">${dataHora}</div>
+      <div class="center" style="font-size:11px;margin-bottom:4px;color:#555;">${dataHora}</div>
 
       <hr class="sep-solid">
 
@@ -404,7 +385,7 @@
     </div>
     ${cupomHTML}`;
 
-        /* 10. Auto print se veio com ?print=1 */
+        /* 10. Auto-print se veio com ?print=1 */
         if (params.get("print") === "1") {
           window.addEventListener("load", () =>
             setTimeout(() => window.print(), 600),

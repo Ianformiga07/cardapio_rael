@@ -81,7 +81,7 @@ export async function doLogin() {
   }
 
   btn.disabled = true;
-  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Entrando...';
+  btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Entrando...';
   errEl.style.display = "none";
 
   try {
@@ -211,12 +211,8 @@ function renderTabelaProdutos(produtos) {
 
       return `
       <tr>
-        <td>
-          <div style="display:flex;align-items:center;gap:0.65rem;min-width:0;">
-            <img src="${p.imagem || "assets/logo1.png"}" alt="${p.nome}" class="prod-thumb" style="flex-shrink:0;">
-            <span class="prod-nome" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px;">${p.nome}</span>
-          </div>
-        </td>
+        <td><img src="${p.imagem || "assets/logo1.png"}" alt="${p.nome}" class="prod-thumb"></td>
+        <td class="prod-nome">${p.nome}</td>
         <td>${p.categoria || "—"}</td>
         <td>${preco}</td>
         <td>
@@ -270,14 +266,6 @@ window._adminEditarProduto = (id) => {
   abrirModalProduto(p);
 };
 
-// Mostrar/ocultar campos específicos de pizza no modal
-function toggleCampoPizza() {
-  const cat = document.getElementById("prod-cat")?.value;
-  const secPizza = document.getElementById("modal-pizza-precos");
-  if (secPizza) secPizza.style.display = cat === "pizza" ? "" : "none";
-}
-window.toggleCampoPizza = toggleCampoPizza;
-
 // ─── MODAL PRODUTO (cadastro / edição) ───────────────────────────────────────
 export function abrirModalProduto(produto = null) {
   const modal = document.getElementById("modal-produto");
@@ -293,18 +281,8 @@ export function abrirModalProduto(produto = null) {
   document.getElementById("prod-preco").value = produto?.preco || "";
   document.getElementById("prod-imagem").value = produto?.imagem || "";
   document.getElementById("prod-cat").value = produto?.categoria || "pizza";
-  document.getElementById("prod-estoque").value = produto?.estoque ?? 99;
+  document.getElementById("prod-estoque").value = produto?.estoque ?? 1;
   document.getElementById("prod-ativo").checked = produto?.ativo ?? true;
-  document.getElementById("prod-badge").value = produto?.badge || "";
-
-  // Campos de preço por tamanho (pizza)
-  const precos = produto?.precos || {};
-  document.getElementById("prod-preco-p").value = precos.P || "";
-  document.getElementById("prod-preco-m").value = precos.M || "";
-  document.getElementById("prod-preco-g").value = precos.G || "";
-
-  // Mostrar/ocultar campos de pizza
-  toggleCampoPizza();
 
   modal.classList.add("active");
 }
@@ -315,28 +293,15 @@ export function fecharModalProduto() {
 
 export async function salvarProduto() {
   const id = document.getElementById("prod-id").value;
-  const categoria = document.getElementById("prod-cat").value;
-
   const dados = {
     nome: document.getElementById("prod-nome").value.trim(),
     descricao: document.getElementById("prod-desc").value.trim(),
     preco: parseFloat(document.getElementById("prod-preco").value) || 0,
     imagem: document.getElementById("prod-imagem").value.trim(),
-    categoria,
+    categoria: document.getElementById("prod-cat").value,
     estoque: parseInt(document.getElementById("prod-estoque").value) || 0,
     ativo: document.getElementById("prod-ativo").checked,
-    badge: document.getElementById("prod-badge").value.trim(),
   };
-
-  // Preços por tamanho (só para pizza)
-  if (categoria === "pizza") {
-    const p = parseFloat(document.getElementById("prod-preco-p").value) || 0;
-    const m = parseFloat(document.getElementById("prod-preco-m").value) || 0;
-    const g = parseFloat(document.getElementById("prod-preco-g").value) || 0;
-    if (p || m || g) {
-      dados.precos = { P: p, M: m, G: g };
-    }
-  }
 
   if (!dados.nome) {
     alert("Informe o nome do produto.");
@@ -391,7 +356,7 @@ function renderTabelaPedidos(pedidos) {
 
   if (pedidos.length === 0) {
     container.innerHTML = `<div class="empty-state">
-      <i class="fas fa-receipt"></i>
+      <i class="fa fa-receipt"></i>
       <p>Nenhum pedido nesta data</p>
       <small>Os pedidos aparecerão aqui em tempo real</small>
     </div>`;
@@ -399,14 +364,11 @@ function renderTabelaPedidos(pedidos) {
   }
 
   const payLabels = {
-    pix: '<i class="fas fa-qrcode"></i> Pix',
-    cartao: '<i class="fas fa-credit-card"></i> Cartão',
-    dinheiro: '<i class="fas fa-money-bill-wave"></i> Dinheiro',
+    pix: "💠 Pix",
+    cartao: "💳 Cartão",
+    dinheiro: "💵 Dinheiro",
   };
-  const typeLabels = {
-    delivery: '<i class="fas fa-motorcycle"></i> Delivery',
-    retirada: '<i class="fas fa-store"></i> Retirada',
-  };
+  const typeLabels = { delivery: "🛵 Delivery", retirada: "🏪 Retirada" };
 
   container.innerHTML = pedidos
     .map((p) => {
@@ -443,18 +405,18 @@ function renderTabelaPedidos(pedidos) {
           <span class="order-total">${(p.total || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}</span>
         </div>
         <div class="order-date">
-          <i class="fas fa-phone-alt"></i> ${p.telefone || "—"}
-          ${p.endereco ? `&nbsp;·&nbsp;<i class="fas fa-map-marker-alt"></i> ${p.endereco}` : ""}
+          <i class="fa fa-phone-alt"></i> ${p.telefone || "—"}
+          ${p.endereco ? `&nbsp;·&nbsp;<i class="fa fa-map-marker-alt"></i> ${p.endereco}` : ""}
         </div>
         <div class="order-items" style="margin:0.4rem 0;">${itensHtml}</div>
         <div style="display:flex;align-items:center;gap:0.6rem;flex-wrap:wrap;margin-top:0.5rem;">
           <span class="badge-sm ${payClass}">${payLabels[payClass] || payClass}</span>
           <span class="badge-sm ${typeClass}">${typeLabels[typeClass] || typeClass}</span>
+          <button class="btn-icon" title="Ver detalhes do pedido" style="margin-left:0;"
+            onclick="window._adminVerDetalhes('${p.id}')">
+            <i class="fa fa-list-alt"></i>
+          </button>
           <div style="margin-left:auto;display:flex;align-items:center;gap:0.5rem;">
-            <button class="btn-icon" title="Imprimir Comanda"
-              onclick="window._adminImprimirComanda('${p.id}')">
-              <i class="fa fa-print"></i>
-            </button>
             <label style="font-size:0.75rem;font-weight:700;">Status:</label>
             <select class="status-select" onchange="window._adminSetStatus('${p.id}', this.value)">
               ${statusOpts}
@@ -471,38 +433,108 @@ window._adminSetStatus = async (id, novoStatus) => {
   await atualizarStatus(id, novoStatus);
 };
 
-window._adminImprimirComanda = (id) => {
+window._adminVerDetalhes = (id) => {
   const p = _pedidosDia.find((x) => x.id === id);
   if (!p) return;
 
-  const payload = {
-    id: p.id,
-    date: p.dataPedido?.toDate
-      ? p.dataPedido.toDate().toISOString()
-      : new Date().toISOString(),
-    customerName: p.clienteNome || "",
-    customerPhone: p.telefone || "",
-    items: (p.itens || []).map((i) => ({
-      name: i.name || i.nome,
-      quantity: i.quantity || i.quantidade || 1,
-      price: i.price || i.preco || 0,
-      size: i.size || i.tamanho || "",
-    })),
-    total: p.total || 0,
-    orderType: p.tipoPedido || "delivery",
-    paymentType: p.pagamento || "pix",
-    address: p.endereco || "",
-    troco: p.troco || 0,
-  };
+  const modal = document.getElementById("modal-pedido-detalhe");
+  if (!modal) return;
 
-  try {
-    const encoded = btoa(encodeURIComponent(JSON.stringify(payload)));
-    const base = window.location.href.replace(/\/[^/]*$/, "/");
-    const url = base + "imprimir.html?d=" + encoded;
-    window.open(url, "_blank");
-  } catch (e) {
-    alert("Erro ao gerar comanda: " + e.message);
-  }
+  const sizeLabels = { P: "Pequena", M: "Média", G: "Grande" };
+  const payLabels = {
+    pix: "💠 PIX",
+    cartao: "💳 Cartão",
+    dinheiro: "💵 Dinheiro",
+  };
+  const typeLabels = { delivery: "🛵 Delivery", retirada: "🏪 Retirada" };
+
+  const ts = p.dataPedido?.toDate
+    ? p.dataPedido.toDate()
+    : new Date(p.dataPedido);
+  const dataStr = ts.toLocaleString("pt-BR");
+
+  // Montar HTML dos itens com todos os detalhes
+  const itens = p.itens || [];
+  const itensHTML = itens
+    .map((item) => {
+      const nome = item.name || item.nome || "—";
+      const qtd = item.quantity || item.quantidade || 1;
+      const preco = item.price || item.preco || 0;
+      const extras = item.extras || [];
+      const obs = (item.obs || "").trim();
+      const metade = item.secondFlavor || item.metade || "";
+      const tam = item.pizzaSize || item.tamanho || "";
+
+      let detHTML = "";
+      if (tam)
+        detHTML += `<div class="det-row det-tam">📏 Tamanho: <strong>${sizeLabels[tam] || tam}</strong></div>`;
+      if (metade)
+        detHTML += `<div class="det-row det-metade">🍕 Metade 2: <strong>${metade}</strong></div>`;
+      extras.forEach((e) => {
+        const label =
+          typeof e === "object" ? e.label || e.name || "" : String(e);
+        if (label.trim())
+          detHTML += `<div class="det-row det-extra">➕ ${label}</div>`;
+      });
+      if (obs)
+        detHTML += `<div class="det-row det-obs">⚠️ Obs: <strong>${obs}</strong></div>`;
+
+      const subtotal = (preco + (item.extrasTotal || 0)) * qtd;
+      const subFmt = subtotal.toLocaleString("pt-BR", {
+        style: "currency",
+        currency: "BRL",
+      });
+
+      return `
+      <div class="det-item">
+        <div class="det-item-header">
+          <span class="det-qtd">${qtd}×</span>
+          <span class="det-nome">${nome}</span>
+          <span class="det-preco">${subFmt}</span>
+        </div>
+        ${detHTML}
+      </div>`;
+    })
+    .join("");
+
+  const total = (p.total || 0).toLocaleString("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+  });
+  const endRow =
+    p.tipoPedido === "delivery" && p.endereco
+      ? `<div class="det-info-row"><span>📍 Endereço</span><span>${p.endereco}</span></div>`
+      : "";
+
+  document.getElementById("modal-ped-titulo").textContent =
+    `Pedido — ${p.clienteNome || "Cliente"}`;
+
+  document.getElementById("modal-ped-body").innerHTML = `
+    <div class="det-meta">
+      <span>${dataStr}</span>
+      <span class="det-badge-pay">${payLabels[p.pagamento] || p.pagamento || "—"}</span>
+      <span class="det-badge-type">${typeLabels[p.tipoPedido] || p.tipoPedido || "—"}</span>
+    </div>
+
+    <div class="det-info-grid">
+      <div class="det-info-row"><span>👤 Cliente</span><span>${p.clienteNome || "—"}</span></div>
+      <div class="det-info-row"><span>📱 Telefone</span><span>${p.telefone || "—"}</span></div>
+      ${endRow}
+    </div>
+
+    <div class="det-section-title">📋 Itens do Pedido</div>
+    <div class="det-itens">${itensHTML || "<p style='color:#999;font-size:.85rem;'>Sem itens</p>"}</div>
+
+    <div class="det-total-row">
+      <span>Total</span>
+      <span>${total}</span>
+    </div>`;
+
+  modal.classList.add("active");
+};
+
+window._fecharModalDetalhe = () => {
+  document.getElementById("modal-pedido-detalhe")?.classList.remove("active");
 };
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -579,7 +611,7 @@ function renderRanking(ranking, containerId) {
   const container = document.getElementById(containerId);
   if (!container) return;
   if (ranking.length === 0) {
-    container.innerHTML = `<div class="empty-state"><i class="fas fa-trophy"></i><p>Sem dados</p></div>`;
+    container.innerHTML = `<div class="empty-state"><i class="fa fa-trophy"></i><p>Sem dados</p></div>`;
     return;
   }
   const rows = ranking
@@ -605,7 +637,7 @@ function renderGraficoDiario(diario) {
   const container = document.getElementById("grafico-diario");
   if (!container) return;
   if (diario.length === 0) {
-    container.innerHTML = `<div class="empty-state"><i class="fas fa-chart-bar"></i><p>Sem dados</p></div>`;
+    container.innerHTML = `<div class="empty-state"><i class="fa fa-chart-bar"></i><p>Sem dados</p></div>`;
     return;
   }
   const maxVal = Math.max(...diario.map((d) => d.total));
@@ -633,7 +665,7 @@ function renderQtdPorProduto(lista) {
   const container = document.getElementById("qtd-por-produto");
   if (!container) return;
   if (lista.length === 0) {
-    container.innerHTML = `<div class="empty-state"><i class="fas fa-box"></i><p>Sem dados</p></div>`;
+    container.innerHTML = `<div class="empty-state"><i class="fa fa-box"></i><p>Sem dados</p></div>`;
     return;
   }
   const rows = lista
