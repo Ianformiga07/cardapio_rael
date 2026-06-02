@@ -712,6 +712,7 @@
         padding: 1.35rem 1.25rem;
         position: relative;
         overflow: hidden;
+        min-width: 0;
         transition:
           transform var(--transition),
           box-shadow var(--transition);
@@ -810,11 +811,14 @@
 
       .stat-value {
         font-family: "Syne", sans-serif;
-        font-size: 1.7rem;
+        font-size: 1.35rem;
         font-weight: 800;
         color: var(--text);
-        line-height: 1;
+        line-height: 1.1;
         letter-spacing: -0.02em;
+        word-break: break-word;
+        overflow-wrap: break-word;
+        min-width: 0;
       }
 
       .stat-label {
@@ -2383,7 +2387,6 @@
                 <table class="admin-table">
                   <thead>
                     <tr>
-                      <th style="width: 52px"></th>
                       <th>Produto</th>
                       <th>Categoria</th>
                       <th>Preço</th>
@@ -2395,7 +2398,7 @@
                   <tbody id="produtos-tbody">
                     <tr>
                       <td
-                        colspan="7"
+                        colspan="6"
                         style="
                           text-align: center;
                           padding: 2.5rem;
@@ -2488,7 +2491,7 @@
               <div
                 class="stats-grid"
                 style="
-                  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+                  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
                 "
               >
                 <div class="stat-card">

@@ -211,8 +211,12 @@ function renderTabelaProdutos(produtos) {
 
       return `
       <tr>
-        <td><img src="${p.imagem || "assets/logo1.png"}" alt="${p.nome}" class="prod-thumb"></td>
-        <td class="prod-nome">${p.nome}</td>
+        <td>
+          <div style="display:flex;align-items:center;gap:0.65rem;min-width:0;">
+            <img src="${p.imagem || "assets/logo1.png"}" alt="${p.nome}" class="prod-thumb" style="flex-shrink:0;">
+            <span class="prod-nome" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px;">${p.nome}</span>
+          </div>
+        </td>
         <td>${p.categoria || "—"}</td>
         <td>${preco}</td>
         <td>
