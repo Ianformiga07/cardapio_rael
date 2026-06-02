@@ -20,7 +20,12 @@ import {
 // ─── 1. ESCUTAR EVENTO DO script.js (módulo) ─────────────────────────────────
 window.addEventListener("pizzaria:pedido_salvo", (e) => {
   const { firestoreId } = e.detail || {};
-  if (firestoreId) iniciarRastreamentoPedido(firestoreId);
+  if (firestoreId) {
+    iniciarRastreamentoPedido(firestoreId);
+    // Mostrar dot no botão Meus Pedidos
+    const dot = document.getElementById("pedido-ativo-dot");
+    if (dot) dot.style.display = "inline-block";
+  }
 });
 
 // ─── 2. loadHistory() ────────────────────────────────────────────────────────
@@ -130,91 +135,7 @@ function iniciarRastreamentoPedido(pedidoId) {
 }
 
 function atualizarBannerStatus(status, pedido) {
-  const info = STATUS_LABELS[status] || STATUS_LABELS["Pendente"];
-
-  // Criar ou reutilizar o banner flutuante
-  let banner = document.getElementById("tracking-banner");
-  if (!banner) {
-    banner = document.createElement("div");
-    banner.id = "tracking-banner";
-    banner.style.cssText = `
-      position: fixed;
-      bottom: 80px;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 9999;
-      background: #fff;
-      border-radius: 16px;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.18);
-      padding: 0;
-      min-width: 300px;
-      max-width: 92vw;
-      overflow: hidden;
-      font-family: inherit;
-      cursor: pointer;
-      transition: box-shadow 0.2s;
-    `;
-    banner.title = "Clique para ver detalhes";
-    banner.onclick = () => abrirModalTracking();
-    document.body.appendChild(banner);
-  }
-
-  const passos = [
-    { label: "Recebido", k: "Pendente" },
-    { label: "Preparando", k: "Preparando" },
-    { label: "Entrega", k: "Saiu para entrega" },
-    { label: "Entregue", k: "Entregue" },
-  ];
-
-  // Determinar progresso
-  const progressoAtual = info.progresso;
-  const isCancelado = status === "Cancelado";
-
-  const passosHtml = isCancelado
-    ? `<div style="text-align:center;font-size:0.78rem;color:#ef4444;font-weight:600;padding-top:4px;">Pedido cancelado</div>`
-    : passos
-        .map((p, i) => {
-          const idx = i + 1;
-          const ativo = idx === progressoAtual;
-          const feito = idx < progressoAtual;
-          const cor = feito || ativo ? info.cor : "#d1d5db";
-          return `
-          <div style="display:flex;flex-direction:column;align-items:center;gap:2px;flex:1;">
-            <div style="width:22px;height:22px;border-radius:50%;background:${cor};display:flex;align-items:center;justify-content:center;font-size:0.7rem;color:#fff;font-weight:700;box-shadow:${ativo ? "0 0 0 3px " + info.cor + "44" : "none"};transition:all 0.3s;">
-              ${feito ? "✓" : idx}
-            </div>
-            <span style="font-size:0.62rem;color:${ativo ? info.cor : "#9ca3af"};font-weight:${ativo ? 700 : 400};text-align:center;line-height:1.2;">${p.label}</span>
-          </div>`;
-        })
-        .join(
-          `<div style="flex:1;height:2px;background:${progressoAtual > 1 ? info.cor : "#e5e7eb"};align-self:center;margin-bottom:14px;transition:background 0.3s;"></div>`,
-        );
-
-  const isEntregue = status === "Entregue";
-  const isSaiu = status === "Saiu para entrega";
-
-  banner.innerHTML = `
-    <div style="background:${info.cor};padding:${isEntregue ? "14px" : "10px"} 16px;display:flex;align-items:center;gap:8px;">
-      <span style="font-size:${isEntregue ? "1.8rem" : "1.4rem"};">${info.emoji}</span>
-      <div style="flex:1;">
-        <div style="color:#fff;font-weight:800;font-size:${isEntregue ? "1rem" : "0.9rem"};">${info.texto}</div>
-        <div style="color:#ffffffdd;font-size:0.75rem;margin-top:2px;">${info.subtexto || ""}</div>
-      </div>
-      <button onclick="event.stopPropagation();fecharTracking()" style="margin-left:auto;background:rgba(255,255,255,0.2);border:none;color:#fff;width:24px;height:24px;border-radius:50%;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;padding:0;line-height:1;flex-shrink:0;">×</button>
-    </div>
-    ${
-      !isEntregue
-        ? `<div style="padding:12px 16px;">
-      <div style="display:flex;align-items:flex-start;gap:0;padding:0 4px;">
-        ${passosHtml}
-      </div>
-      ${isSaiu ? `<div style="text-align:center;font-size:0.72rem;color:#8b5cf6;font-weight:700;margin-top:4px;animation:pulse 1.5s infinite;">🏍️ Entregador a caminho!</div>` : ""}
-    </div>`
-        : ""
-    }
-  `;
-
-  // Salvar status atual no cache
+  // Atualizar cache local com novo status
   try {
     const cache = JSON.parse(
       localStorage.getItem("pizzaria_ra_orders_cache") || "[]",
@@ -225,21 +146,40 @@ function atualizarBannerStatus(status, pedido) {
     }
   } catch (_) {}
 
-  // Notificação sonora/visual ao mudar de status
-  if (status === "Saiu para entrega" || status === "Entregue") {
-    banner.style.boxShadow = `0 8px 32px ${info.cor}66`;
-    // Pulsação rápida
-    banner.animate(
-      [
-        { transform: "translateX(-50%) scale(1)" },
-        { transform: "translateX(-50%) scale(1.04)" },
-        { transform: "translateX(-50%) scale(1)" },
-      ],
-      { duration: 400, iterations: 3 },
-    );
+  // Mostrar/esconder indicador no botão "Meus Pedidos"
+  const dot = document.getElementById("pedido-ativo-dot");
+  if (dot) {
+    const isFinal = status === "Entregue" || status === "Cancelado";
+    dot.style.display = isFinal ? "none" : "inline-block";
   }
 
-  // Parar listener quando status é final (não precisa mais atualizar)
+  // Se o modal de pedidos estiver aberto, re-renderizar para mostrar novo status
+  const historyModal = document.getElementById("history-modal");
+  if (historyModal && historyModal.classList.contains("active")) {
+    if (typeof window._renderHistoryList === "function") {
+      window._renderHistoryList();
+    }
+  }
+
+  // Notificação visual: mudar cor do botão brevemente quando status importante muda
+  const btn = document.getElementById("btn-meus-pedidos");
+  if (
+    btn &&
+    (status === "Preparando" ||
+      status === "Saiu para entrega" ||
+      status === "Entregue")
+  ) {
+    const info = STATUS_LABELS[status];
+    btn.style.background = info ? info.cor : "";
+    btn.style.color = "#fff";
+    btn.style.transition = "all 0.3s";
+    setTimeout(() => {
+      btn.style.background = "";
+      btn.style.color = "";
+    }, 4000);
+  }
+
+  // Parar listener quando status é final
   if (status === "Entregue" || status === "Cancelado") {
     if (_unsubTracking) {
       _unsubTracking();
@@ -247,72 +187,6 @@ function atualizarBannerStatus(status, pedido) {
     }
   }
 }
-
-function abrirModalTracking() {
-  const cache = window.loadHistory ? window.loadHistory() : [];
-  const ultimo = cache[0];
-  if (!ultimo) return;
-
-  const info = STATUS_LABELS[ultimo.status] || STATUS_LABELS["Pendente"];
-  const itensTxt = (ultimo.items || [])
-    .map((i) => `${i.quantity || 1}× ${i.name || i.nome}`)
-    .join(", ");
-  const totalFmt = (ultimo.total || 0).toLocaleString("pt-BR", {
-    style: "currency",
-    currency: "BRL",
-  });
-
-  let modal = document.getElementById("tracking-modal");
-  if (!modal) {
-    modal = document.createElement("div");
-    modal.id = "tracking-modal";
-    modal.style.cssText = `
-      position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,0.55);
-      display:flex;align-items:flex-end;justify-content:center;
-    `;
-    modal.onclick = (e) => {
-      if (e.target === modal) fecharModalTracking();
-    };
-    document.body.appendChild(modal);
-  }
-
-  modal.innerHTML = `
-    <div style="background:#fff;border-radius:20px 20px 0 0;padding:24px 20px 32px;width:100%;max-width:480px;max-height:80vh;overflow-y:auto;">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
-        <h3 style="margin:0;font-size:1.1rem;font-weight:800;">🔍 Acompanhar Pedido</h3>
-        <button onclick="fecharModalTracking()" style="background:#f3f4f6;border:none;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:1.1rem;">×</button>
-      </div>
-      <div style="background:${info.cor}15;border:1.5px solid ${info.cor}44;border-radius:12px;padding:16px;margin-bottom:16px;text-align:center;">
-        <div style="font-size:2.5rem;margin-bottom:6px;">${info.emoji}</div>
-        <div style="font-weight:800;color:${info.cor};font-size:1.05rem;">${info.texto}</div>
-        <div style="font-size:0.8rem;color:#6b7280;margin-top:4px;">${info.subtexto || ""}</div>
-      </div>
-      <div style="background:#f9fafb;border-radius:10px;padding:12px 14px;font-size:0.83rem;color:#374151;margin-bottom:12px;">
-        <div style="font-weight:700;margin-bottom:6px;color:#111;">👤 ${ultimo.customerName || "Cliente"}</div>
-        <div style="font-weight:700;margin-bottom:4px;">📋 Itens:</div>
-        <div>${itensTxt}</div>
-        <div style="margin-top:8px;font-weight:800;color:#111;font-size:0.95rem;">${totalFmt}</div>
-      </div>
-      <p style="font-size:0.75rem;color:#9ca3af;margin:0;text-align:center;">
-        Esta página atualiza automaticamente quando o status mudar.
-      </p>
-    </div>
-  `;
-  modal.style.display = "flex";
-}
-
-window.fecharModalTracking = function () {
-  const m = document.getElementById("tracking-modal");
-  if (m) m.style.display = "none";
-};
-window.fecharTracking = function () {
-  const b = document.getElementById("tracking-banner");
-  if (b) b.remove();
-  if (_unsubTracking) {
-    _unsubTracking();
-    _unsubTracking = null;
-  }
-};
 
 // ─── INICIAR ao carregar DOM ─────────────────────────────────────────────────
 document.addEventListener("DOMContentLoaded", () => {
@@ -334,6 +208,9 @@ document.addEventListener("DOMContentLoaded", () => {
       !["Entregue", "Cancelado"].includes(cache[0].status)
     ) {
       iniciarRastreamentoPedido(lastId);
+      // Mostrar dot indicador no botão
+      const dot = document.getElementById("pedido-ativo-dot");
+      if (dot) dot.style.display = "inline-block";
     }
   } catch (_) {}
 });

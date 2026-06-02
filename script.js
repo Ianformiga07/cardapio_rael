@@ -163,13 +163,51 @@ function openExtrasModal(name, price, isPizza, pizzaPrices) {
   extrasProductName.textContent = name;
   extrasObs.value = "";
 
+  // Seção de tamanho de pizza
+  const pizzaSizeSection = document.getElementById("pizza-size-section");
+  const extraChipsSection = document.getElementById("extras-chips-section");
+  const sizeWarn = document.getElementById("pizza-size-warn");
+
   if (isPizza) {
+    // Mostrar seleção de tamanho e segundo sabor, ocultar adicionais
+    if (pizzaSizeSection) pizzaSizeSection.style.display = "block";
+    if (extraChipsSection) extraChipsSection.style.display = "none";
+    if (sizeWarn) sizeWarn.style.display = "none";
+
+    // Limpar seleção de tamanho anterior
+    document
+      .querySelectorAll(".pizza-size-btn")
+      .forEach((btn) => btn.classList.remove("selected-order"));
+
+    // Atualizar preços nos botões de tamanho
+    if (pizzaPrices) {
+      const labelP = document.getElementById("price-label-P");
+      const labelM = document.getElementById("price-label-M");
+      const labelG = document.getElementById("price-label-G");
+      if (labelP)
+        labelP.textContent = pizzaPrices.P
+          ? "R$ " + Number(pizzaPrices.P).toFixed(2).replace(".", ",")
+          : "";
+      if (labelM)
+        labelM.textContent = pizzaPrices.M
+          ? "R$ " + Number(pizzaPrices.M).toFixed(2).replace(".", ",")
+          : "";
+      if (labelG)
+        labelG.textContent = pizzaPrices.G
+          ? "R$ " + Number(pizzaPrices.G).toFixed(2).replace(".", ",")
+          : "";
+    }
+
+    // Segundo sabor
     secondFlavorSection.style.display = "block";
     Array.from(secondFlavorSelect.options).forEach((opt) => {
       opt.style.display = opt.value === name ? "none" : "";
     });
     secondFlavorSelect.value = "";
   } else {
+    // Sanduíche/bebida: mostrar adicionais, ocultar pizza
+    if (pizzaSizeSection) pizzaSizeSection.style.display = "none";
+    if (extraChipsSection) extraChipsSection.style.display = "block";
     secondFlavorSection.style.display = "none";
     secondFlavorSelect.value = "";
   }
@@ -782,8 +820,27 @@ function openHistoryModal() {
   historyModal.classList.add("active");
 }
 
+// Expor para o patch poder re-renderizar quando status mudar
+window._renderHistoryList = null; // será sobrescrito abaixo
+
+const STATUS_COLORS = {
+  Pendente: { cor: "#f59e0b", emoji: "⏳" },
+  Preparando: { cor: "#3b82f6", emoji: "👨‍🍳" },
+  "Saiu para entrega": { cor: "#8b5cf6", emoji: "🛵" },
+  Entregue: { cor: "#10b981", emoji: "✅" },
+  Cancelado: { cor: "#ef4444", emoji: "❌" },
+};
+
 function renderHistoryList() {
-  const history = loadHistory();
+  // Usar o cache que tem o status atualizado
+  let history;
+  try {
+    history = JSON.parse(
+      localStorage.getItem("pizzaria_ra_orders_cache") || "[]",
+    );
+  } catch {
+    history = [];
+  }
   historyList.innerHTML = "";
 
   if (history.length === 0) {
@@ -803,7 +860,7 @@ function renderHistoryList() {
   };
   const orderLabels = { delivery: "🛵 Delivery", retirada: "🏪 Retirada" };
 
-  history.forEach((order) => {
+  history.forEach((order, idx) => {
     const dateObj = new Date(order.date);
     const dateStr = dateObj.toLocaleString("pt-BR", {
       day: "2-digit",
@@ -813,9 +870,9 @@ function renderHistoryList() {
       minute: "2-digit",
     });
 
-    const itemsHTML = order.items
+    const itemsHTML = (order.items || [])
       .map((item) => {
-        let txt = item.quantity + "× " + item.name;
+        let txt = (item.quantity || 1) + "× " + (item.name || item.nome);
         if (item.secondFlavor) txt += " | Metade: " + item.secondFlavor;
         if (item.extras && item.extras.length > 0)
           txt +=
@@ -843,20 +900,34 @@ function renderHistoryList() {
         "</span>"
       : "";
 
+    // Status badge com cor dinâmica
+    const statusInfo = STATUS_COLORS[order.status] || STATUS_COLORS["Pendente"];
+    const isUltimo = idx === 0;
+    const statusBadge = `
+      <div style="display:flex;align-items:center;gap:6px;padding:8px 10px;background:${statusInfo.cor}15;border:1.5px solid ${statusInfo.cor}44;border-radius:8px;margin-top:8px;">
+        <span style="font-size:1rem;">${statusInfo.emoji}</span>
+        <div style="flex:1;">
+          <div style="font-weight:800;color:${statusInfo.cor};font-size:0.82rem;">${order.status || "Pendente"}</div>
+          ${isUltimo ? '<div style="font-size:0.72rem;color:#6b7280;">Atualiza automaticamente</div>' : ""}
+        </div>
+        ${isUltimo && order.status !== "Entregue" && order.status !== "Cancelado" ? `<span style="width:8px;height:8px;border-radius:50%;background:${statusInfo.cor};display:inline-block;animation:pulse 1.5s infinite;"></span>` : ""}
+      </div>`;
+
     const card = document.createElement("div");
     card.className = "history-card";
+    if (isUltimo) card.id = "history-card-ultimo";
     card.innerHTML =
       '<div class="history-card-header">' +
       "<div>" +
       '<div style="font-size:0.8rem;font-weight:800;">' +
-      order.customerName +
+      (order.customerName || "") +
       "</div>" +
       '<div class="history-card-date">' +
       dateStr +
       "</div>" +
       "</div>" +
       '<div class="history-card-total">' +
-      order.total.toLocaleString("pt-BR", {
+      (order.total || 0).toLocaleString("pt-BR", {
         style: "currency",
         currency: "BRL",
       }) +
@@ -865,11 +936,12 @@ function renderHistoryList() {
       '<div class="history-card-body">' +
       '<div class="history-customer-line">' +
       '<i class="fa fa-phone-alt" style="color:var(--text-muted);font-size:0.75rem;"></i>' +
-      order.customerPhone +
+      (order.customerPhone || "") +
       addressHTML +
       "</div>" +
       itemsHTML +
-      '<div class="history-badge-row">' +
+      statusBadge +
+      '<div class="history-badge-row" style="margin-top:8px;">' +
       '<span class="history-badge ' +
       payClass +
       '">' +
@@ -883,6 +955,9 @@ function renderHistoryList() {
     historyList.appendChild(card);
   });
 }
+
+// Disponibilizar para o patch re-renderizar ao atualizar status
+window._renderHistoryList = renderHistoryList;
 
 function clearHistory() {
   if (!confirm("Tem certeza que deseja limpar todo o histórico de pedidos?"))

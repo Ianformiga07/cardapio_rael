@@ -1193,8 +1193,9 @@
           <span class="status-dot"></span>
           <span>Ter à Dom — 18:00 às 23:00</span>
         </div>
-        <button class="history-header-btn" onclick="openHistoryModal()">
+        <button class="history-header-btn" id="btn-meus-pedidos" onclick="openHistoryModal()">
           <i class="fa fa-history"></i> Meus Pedidos
+          <span id="pedido-ativo-dot" style="display:none;width:8px;height:8px;border-radius:50%;background:#10b981;margin-left:4px;animation:pulse 1.5s infinite;vertical-align:middle;"></span>
         </button>
       </div>
     </header>
@@ -1930,53 +1931,6 @@
         const warn = document.getElementById("pizza-size-warn");
         if (warn) warn.style.display = "none";
       }
-
-      // Atualizar labels de preço ao abrir modal para pizza
-      document.addEventListener("DOMContentLoaded", function () {
-        const extrasModal = document.getElementById("extras-modal");
-
-        // Observer: quando o modal de adicionais abrir, mostrar/ocultar seções de pizza
-        const observer = new MutationObserver(function (mutations) {
-          mutations.forEach(function (m) {
-            if (m.type === "attributes" && m.attributeName === "class") {
-              if (extrasModal.classList.contains("active")) {
-                const isPizza = extrasModal.dataset.isPizza === "true";
-                document.getElementById("pizza-size-section").style.display =
-                  isPizza ? "block" : "none";
-                document.getElementById("second-flavor-section").style.display =
-                  isPizza ? "block" : "none";
-                document.getElementById("extras-chips-section").style.display =
-                  isPizza ? "none" : "block";
-                document
-                  .querySelectorAll(".pizza-size-btn")
-                  .forEach((btn) => btn.classList.remove("selected-order"));
-                try {
-                  const prices = JSON.parse(extrasModal.dataset.prices || "{}");
-                  if (prices.P)
-                    document.getElementById("price-label-P").textContent =
-                      "R$ " + prices.P;
-                  if (prices.M)
-                    document.getElementById("price-label-M").textContent =
-                      "R$ " + prices.M;
-                  if (prices.G)
-                    document.getElementById("price-label-G").textContent =
-                      "R$ " + prices.G;
-                } catch (e) {}
-              }
-            }
-          });
-        });
-        observer.observe(extrasModal, { attributes: true });
-
-        // Ao clicar em adicionar pizza: salvar preços e dados no dataset do modal
-        document.querySelectorAll(".add-td-cart-btn").forEach(function (btn) {
-          btn.addEventListener("click", function () {
-            extrasModal.dataset.isPizza = btn.dataset.isPizza || "false";
-            extrasModal.dataset.prices = btn.dataset.prices || "{}";
-            extrasModal.dataset.baseName = btn.dataset.name;
-          });
-        });
-      });
     </script>
   </body>
 </html>
