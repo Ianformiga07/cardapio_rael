@@ -483,40 +483,48 @@ window._adminVerDetalhes = (id) => {
   const payLabels = { pix: "Pix", cartao: "Cartão", dinheiro: "Dinheiro" };
   const typeLabels = { delivery: "🛵 Delivery", retirada: "🏪 Retirada" };
 
-  const ts = p.dataPedido?.toDate ? p.dataPedido.toDate() : new Date(p.dataPedido);
+  const ts = p.dataPedido?.toDate
+    ? p.dataPedido.toDate()
+    : new Date(p.dataPedido);
   const dataStr = ts.toLocaleString("pt-BR", {
-    day: "2-digit", month: "2-digit", year: "numeric",
-    hour: "2-digit", minute: "2-digit",
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
   });
 
-  const itensHTML = (p.itens || []).map((item) => {
-    const nome = item.name || item.nome || "Item";
-    const qty = item.quantity || item.quantidade || 1;
-    const size = item.pizzaSize || item.size || item.tamanho || "";
-    const sizeLabel = sizeLabels[size] || size;
-    const secondFlavor = item.secondFlavor || item.metade || "";
-    const extras = item.extras || [];
-    const obs = item.obs || "";
+  const itensHTML = (p.itens || [])
+    .map((item) => {
+      const nome = item.name || item.nome || "Item";
+      const qty = item.quantity || item.quantidade || 1;
+      const size = item.pizzaSize || item.size || item.tamanho || "";
+      const sizeLabel = sizeLabels[size] || size;
+      const secondFlavor = item.secondFlavor || item.metade || "";
+      const extras = item.extras || [];
+      const obs = item.obs || "";
 
-    let linhas = `<div class="det-item">`;
-    linhas += `<div class="det-item-nome">${qty}× ${nome}${sizeLabel ? ` <span class="det-tag">${sizeLabel}</span>` : ""}</div>`;
-    if (secondFlavor) {
-      linhas += `<div class="det-linha det-metade">🍕 Metade 2: <strong>${secondFlavor}</strong></div>`;
-    }
-    if (extras.length > 0) {
-      extras.forEach((e) => {
-        const label = typeof e === "object" ? e.label || e.name || "" : String(e);
-        if (label.trim()) {
-          linhas += `<div class="det-linha det-extra">➕ ${label}</div>`;
-        }
-      });
-    }
-    if (obs) {
-      linhas += `<div class="det-linha det-obs">⚠️ OBS: ${obs}</div>`;
-    }
-    linhas += `</div>`;
-    return linhas;
-  }).join("");
+      let linhas = `<div class="det-item">`;
+      linhas += `<div class="det-item-nome">${qty}× ${nome}${sizeLabel ? ` <span class="det-tag">${sizeLabel}</span>` : ""}</div>`;
+      if (secondFlavor) {
+        linhas += `<div class="det-linha det-metade">🍕 Metade 2: <strong>${secondFlavor}</strong></div>`;
+      }
+      if (extras.length > 0) {
+        extras.forEach((e) => {
+          const label =
+            typeof e === "object" ? e.label || e.name || "" : String(e);
+          if (label.trim()) {
+            linhas += `<div class="det-linha det-extra">➕ ${label}</div>`;
+          }
+        });
+      }
+      if (obs) {
+        linhas += `<div class="det-linha det-obs">⚠️ OBS: ${obs}</div>`;
+      }
+      linhas += `</div>`;
+      return linhas;
+    })
+    .join("");
 
   const trocoPart = p.troco
     ? `<div class="det-info-row"><span>Troco para:</span><span>R$ ${Number(p.troco).toFixed(2)}</span></div>`
