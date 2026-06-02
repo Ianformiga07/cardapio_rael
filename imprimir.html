@@ -62,7 +62,7 @@
         background: #333;
       }
 
-      /* ── COMANDA — otimizada para térmica 58mm ── */
+      /* COMANDA — otimizada para impressora térmica 58mm */
       .cupom {
         width: 260px;
         background: #fff;
@@ -76,7 +76,7 @@
 
       .cupom .logo {
         text-align: center;
-        font-size: 17px;
+        font-size: 18px;
         font-weight: 900;
         letter-spacing: 1px;
         text-transform: uppercase;
@@ -84,7 +84,7 @@
       }
       .cupom .subtitulo {
         text-align: center;
-        font-size: 11px;
+        font-size: 12px;
         font-weight: 700;
         letter-spacing: 2px;
         text-transform: uppercase;
@@ -110,6 +110,12 @@
         justify-content: space-between;
         gap: 4px;
       }
+      .cupom .label {
+        font-weight: 700;
+      }
+      .cupom .center {
+        text-align: center;
+      }
       .cupom .bold {
         font-weight: 900;
       }
@@ -125,31 +131,21 @@
         padding: 4px 0;
       }
 
-      /* HORA */
-      .cupom .hora {
-        text-align: center;
-        font-size: 11px;
-        margin-bottom: 4px;
-        font-weight: 700;
-      }
-
       /* ITENS */
       .cupom .itens-titulo {
-        font-size: 13px;
+        font-size: 14px;
         font-weight: 900;
         text-transform: uppercase;
         letter-spacing: 1px;
         margin: 6px 0 4px;
       }
 
-      /* Bloco de cada item */
+      /* bloco do item */
       .cupom .item-bloco {
-        margin-bottom: 8px;
-        border-bottom: 1px dashed #aaa;
-        padding-bottom: 6px;
-      }
-      .cupom .item-bloco:last-child {
-        border-bottom: none;
+        margin-top: 8px;
+        border: 2px solid #000;
+        border-radius: 2px;
+        overflow: hidden;
       }
 
       .cupom .item-nome {
@@ -157,69 +153,63 @@
         font-size: 14px;
         background: #000;
         color: #fff;
-        padding: 3px 6px;
-        border-radius: 2px;
-        margin-bottom: 3px;
-        display: flex;
-        justify-content: space-between;
-      }
-      .cupom .item-qtd {
-        font-size: 13px;
-        font-weight: 900;
+        padding: 4px 6px;
       }
 
-      /* Tamanho da pizza */
-      .cupom .item-tamanho {
+      .cupom .item-detalhe {
+        padding: 2px 8px;
         font-size: 12px;
+        color: #000;
+        font-weight: 700;
+        border-bottom: 1px dashed #ccc;
+      }
+      .cupom .item-detalhe:last-child {
+        border-bottom: none;
+      }
+
+      /* TAMANHO da pizza — destaque */
+      .cupom .item-tamanho {
+        padding: 3px 8px;
+        font-size: 13px;
         font-weight: 900;
-        padding-left: 8px;
-        margin-top: 2px;
-        text-transform: uppercase;
+        background: #f0f0f0;
+        border-bottom: 1px solid #ccc;
         letter-spacing: 0.5px;
       }
 
-      /* Metade/segundo sabor */
+      /* METADE da pizza */
       .cupom .item-metade {
+        padding: 3px 8px;
         font-size: 12px;
-        font-weight: 700;
-        padding-left: 8px;
-        margin-top: 1px;
-      }
-      .cupom .item-metade::before {
-        content: "1/2 METADE: ";
         font-weight: 900;
+        border-bottom: 1px dashed #ccc;
       }
 
-      /* Adicionais */
+      /* EXTRAS / adicionais */
       .cupom .item-extra {
+        padding: 2px 8px;
         font-size: 12px;
         font-weight: 700;
-        padding-left: 8px;
-        margin-top: 1px;
-      }
-      .cupom .item-extra::before {
-        content: "+ ";
-        font-weight: 900;
+        border-bottom: 1px dashed #ccc;
+        color: #000;
       }
 
-      /* Observacao / remocoes */
+      /* OBSERVAÇÃO — destaque máximo para a cozinha */
       .cupom .item-obs {
-        font-size: 12px;
+        padding: 4px 8px;
+        font-size: 13px;
         font-weight: 900;
-        padding: 3px 6px;
-        border-left: 3px solid #000;
-        margin: 3px 0 2px 8px;
-        background: #f0f0f0;
-      }
-      .cupom .item-obs::before {
-        content: "OBS: ";
+        background: #000;
+        color: #fff;
+        border-top: 2px solid #000;
+        letter-spacing: 0.3px;
       }
 
       /* TIPO DE ENTREGA */
       .cupom .entrega-box {
         border: 3px solid #000;
         padding: 6px 8px;
-        margin: 8px 0 4px;
+        margin: 8px 0 6px;
         font-weight: 900;
         font-size: 15px;
         text-align: center;
@@ -227,41 +217,27 @@
         letter-spacing: 1px;
       }
 
-      /* Endereco (delivery) */
+      /* ENDEREÇO (delivery) */
       .cupom .endereco-box {
-        font-size: 11px;
-        font-weight: 700;
-        padding: 4px 6px;
-        border: 1px solid #000;
-        margin-bottom: 4px;
-        line-height: 1.5;
-      }
-      .cupom .endereco-box .end-label {
-        font-weight: 900;
-        font-size: 10px;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-      }
-
-      /* Pagamento */
-      .cupom .pag-linha {
         font-size: 12px;
         font-weight: 700;
-        margin: 2px 0;
+        padding: 4px 6px;
+        border: 1px dashed #000;
+        margin-bottom: 6px;
+        line-height: 1.4;
       }
 
-      /* CLIENTE (rodape) */
+      /* CLIENTE (rodapé) */
       .cupom .cliente-box {
-        font-size: 11px;
+        font-size: 12px;
         margin-top: 6px;
         padding-top: 4px;
         border-top: 1px dashed #000;
         color: #333;
         text-align: center;
-        line-height: 1.5;
       }
 
-      /* erro */
+      /* ERRO */
       #error-box {
         background: #fff;
         border-radius: 12px;
@@ -275,7 +251,7 @@
         margin-bottom: 12px;
       }
 
-      /* ── IMPRESSAO termica 58mm ── */
+      /* IMPRESSÃO — térmica 58mm */
       @media print {
         body {
           background: #fff;
@@ -312,8 +288,8 @@
 
         if (!raw) {
           app.innerHTML = `<div id="error-box">
-      <h2>Link invalido</h2>
-      <p>Este link nao contem dados do pedido.<br>Solicite um novo link.</p>
+      <h2>⚠️ Link inválido</h2>
+      <p>Este link não contém dados do pedido.<br>Solicite um novo link ao fazer o pedido.</p>
     </div>`;
           return;
         }
@@ -323,154 +299,112 @@
           order = JSON.parse(decodeURIComponent(atob(raw)));
         } catch (e) {
           app.innerHTML = `<div id="error-box">
-      <h2>Erro ao ler pedido</h2>
-      <p>Os dados do link estao corrompidos.</p>
+      <h2>⚠️ Erro ao ler pedido</h2>
+      <p>Os dados do link estão corrompidos.</p>
     </div>`;
           return;
         }
 
         /* 2. Helpers */
-        const tamLabels = { P: "PEQUENA", M: "MEDIA", G: "GRANDE" };
-        const pagLabels = {
-          pix: "PIX",
-          cartao: "CARTAO",
-          dinheiro: "DINHEIRO",
-        };
+        const sizeLabels = { P: "📏 PEQUENA", M: "📏 MÉDIA", G: "📏 GRANDE" };
 
-        function fmtHora(iso) {
-          try {
-            return new Date(iso).toLocaleString("pt-BR");
-          } catch (e) {
-            return "";
-          }
-        }
-
-        /* 3. Montar itens com TODOS os detalhes para a cozinha */
+        /* 3. Montar itens — todos os detalhes para a cozinha */
         let itensHTML = "";
-        const items = order.items || order.itens || order.cartSnapshot || [];
+        order.items.forEach((item) => {
+          let blocoDetalhes = "";
 
-        items.forEach((item) => {
-          const nome = item.name || item.nome || "—";
-          const qtd = item.quantity || item.quantidade || 1;
-          const tamanho = item.pizzaSize || item.tamanho || item.size || "";
-          const metade = item.secondFlavor || item.metade || "";
-          const extras = item.extras || [];
-          const obs = (item.obs || "").trim();
+          // Tamanho da pizza
+          if (item.pizzaSize) {
+            const tamLabel =
+              sizeLabels[item.pizzaSize] || "📏 " + item.pizzaSize;
+            blocoDetalhes += `<div class="item-tamanho">${tamLabel}</div>`;
+          }
 
-          itensHTML += `<div class="item-bloco">`;
+          // Metade (segundo sabor)
+          if (item.secondFlavor && item.secondFlavor.trim()) {
+            blocoDetalhes += `<div class="item-metade">🍕 METADE 2: ${item.secondFlavor}</div>`;
+          }
 
-          /* Nome + quantidade */
-          itensHTML += `<div class="item-nome">
-      <span>${nome}</span>
-      <span class="item-qtd">${qtd}x</span>
-    </div>`;
-
-          /* Tamanho */
-          if (tamanho)
-            itensHTML += `<div class="item-tamanho">TAMANHO: ${tamLabels[tamanho] || tamanho}</div>`;
-
-          /* Segundo sabor / metade */
-          if (metade) itensHTML += `<div class="item-metade">${metade}</div>`;
-
-          /* Adicionais */
-          if (extras.length > 0) {
-            extras.forEach((e) => {
-              const label = typeof e === "object" ? e.label : e;
-              itensHTML += `<div class="item-extra">${label}</div>`;
+          // Extras / adicionais
+          if (item.extras && item.extras.length > 0) {
+            item.extras.forEach((e) => {
+              const el =
+                typeof e === "object"
+                  ? e.label || e.name || JSON.stringify(e)
+                  : e;
+              blocoDetalhes += `<div class="item-extra">➕ ${el}</div>`;
             });
           }
 
-          /* Observacao / remocoes */
-          if (obs) itensHTML += `<div class="item-obs">${obs}</div>`;
+          // Observação — fundo preto para máximo destaque
+          if (item.obs && item.obs.trim()) {
+            blocoDetalhes += `<div class="item-obs">⚠️ OBS: ${item.obs.trim()}</div>`;
+          }
 
-          itensHTML += `</div>`;
+          itensHTML += `
+      <div class="item-bloco">
+        <div class="item-nome">${item.quantity}× ${item.name}</div>
+        ${blocoDetalhes}
+      </div>`;
         });
 
-        if (!itensHTML)
-          itensHTML = '<div style="padding:4px 0;">Sem itens</div>';
-
         /* 4. Tipo de entrega */
-        const orderLabels = { delivery: "DELIVERY", retirada: "RETIRADA" };
+        const orderLabels = {
+          delivery: "🛵 DELIVERY",
+          retirada: "🏪 RETIRADA",
+        };
         const tipoEntrega =
           orderLabels[order.orderType] || (order.orderType || "").toUpperCase();
 
-        /* 5. Endereco (apenas delivery) */
-        let enderecoHTML = "";
-        if (order.orderType === "delivery" && order.address) {
-          enderecoHTML = `<div class="endereco-box">
-      <div class="end-label">Endereco de entrega:</div>
-      <div>${order.address}</div>
-    </div>`;
-        }
+        /* 5. Endereço (apenas delivery) */
+        const enderecoHTML =
+          order.orderType === "delivery" && order.address
+            ? `<div class="endereco-box">📍 ${order.address}</div>`
+            : "";
 
-        /* 6. Pagamento */
-        const pagStr =
-          pagLabels[order.paymentType] ||
-          (order.paymentType || "").toUpperCase();
-        let pagHTML = `<div class="pag-linha">PGTO: ${pagStr}</div>`;
-        if (order.paymentType === "dinheiro" && order.troco) {
-          const troco = order.troco - order.total;
-          pagHTML += `<div class="pag-linha">TROCO PARA: R$ ${Number(order.troco).toFixed(2)}</div>`;
-          pagHTML += `<div class="pag-linha">TROCO: R$ ${troco.toFixed(2)}</div>`;
-        }
-
-        /* 7. Numero do pedido */
+        /* 6. Número do pedido */
         const numPedido = String(order.id || Date.now()).slice(-4);
 
-        /* 8. Hora do pedido */
-        const horaStr = fmtHora(order.date);
+        /* 7. Data/hora */
+        let dataHora = "";
+        try {
+          dataHora = new Date(order.date).toLocaleString("pt-BR");
+        } catch (e) {}
 
-        /* 9. Total */
-        const totalStr =
-          "R$ " +
-          Number(order.total || 0)
-            .toFixed(2)
-            .replace(".", ",");
-
-        /* 10. Montar comanda */
+        /* 8. Comanda HTML */
         const cupomHTML = `
     <div class="cupom" id="cupom">
-      <div class="logo">Pizzaria RA</div>
-      <div class="subtitulo">-- comanda de producao --</div>
+      <div class="logo">🍕 Pizzaria RA</div>
+      <div class="subtitulo">— comanda de produção —</div>
 
       <div class="pedido-num">#${numPedido}</div>
-      ${horaStr ? `<div class="hora">${horaStr}</div>` : ""}
+      <div class="center" style="font-size:11px;margin-bottom:4px;">${dataHora}</div>
 
       <hr class="sep-solid">
 
-      <div class="itens-titulo">ITENS A PREPARAR:</div>
+      <div class="itens-titulo">📋 Itens a Preparar:</div>
       ${itensHTML}
 
       <hr class="sep">
 
       <div class="entrega-box">${tipoEntrega}</div>
-
       ${enderecoHTML}
 
-      <div class="sep"></div>
-      ${pagHTML}
-
-      <div class="sep"></div>
-      <div class="row bold" style="font-size:14px;">
-        <span>TOTAL</span>
-        <span>${totalStr}</span>
-      </div>
-
       <div class="cliente-box">
-        <div>${order.customerName || ""}</div>
-        <div>${order.customerPhone || ""}</div>
+        👤 ${order.customerName || "—"}<br>
+        📱 ${order.customerPhone || "—"}
       </div>
     </div>`;
 
-        /* 11. Renderizar */
+        /* 9. Renderizar */
         app.innerHTML = `
     <div class="top-bar">
-      <button class="btn-print" onclick="window.print()">Imprimir Comanda</button>
-      <button class="btn-close" onclick="window.close()">X Fechar</button>
+      <button class="btn-print" onclick="window.print()">🖨️ Imprimir Comanda</button>
+      <button class="btn-close" onclick="window.close()">✕ Fechar</button>
     </div>
     ${cupomHTML}`;
 
-        /* 12. Auto print se veio com ?print=1 */
+        /* 10. Auto print se veio com ?print=1 */
         if (params.get("print") === "1") {
           window.addEventListener("load", () =>
             setTimeout(() => window.print(), 600),
