@@ -550,8 +550,7 @@ function buildOrderData() {
     "\n\n" +
     "━━━━━━━━━━━━━━━━━━━━\n\n" +
     "⏰ Pedido: " +
-    new Date().toLocaleString("pt-BR") +
-    (printLink ? "\n\n🖨️ *COMANDA DE PRODUÇÃO:*\n" + printLink : "");
+    new Date().toLocaleString("pt-BR");
 
   return {
     total,

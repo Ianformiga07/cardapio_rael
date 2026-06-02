@@ -73,30 +73,35 @@ const STATUS_LABELS = {
   Pendente: {
     emoji: "⏳",
     texto: "Aguardando confirmação",
+    subtexto: "Seu pedido foi recebido e será confirmado em breve",
     cor: "#f59e0b",
     progresso: 1,
   },
   Preparando: {
     emoji: "👨‍🍳",
-    texto: "Sendo preparado",
+    texto: "Em produção na cozinha!",
+    subtexto: "Nossos cozinheiros já estão preparando seu pedido",
     cor: "#3b82f6",
     progresso: 2,
   },
   "Saiu para entrega": {
     emoji: "🛵",
-    texto: "Saiu para entrega",
+    texto: "Saiu para entrega!",
+    subtexto: "Seu pedido está a caminho. Fique de olho!",
     cor: "#8b5cf6",
     progresso: 3,
   },
   Entregue: {
-    emoji: "✅",
-    texto: "Entregue com sucesso!",
+    emoji: "🎉",
+    texto: "Pedido entregue!",
+    subtexto: "Bom apetite! Obrigado pela preferência 😊",
     cor: "#10b981",
     progresso: 4,
   },
   Cancelado: {
     emoji: "❌",
     texto: "Pedido cancelado",
+    subtexto: "Entre em contato conosco para mais informações",
     cor: "#ef4444",
     progresso: 0,
   },
@@ -185,20 +190,28 @@ function atualizarBannerStatus(status, pedido) {
           `<div style="flex:1;height:2px;background:${progressoAtual > 1 ? info.cor : "#e5e7eb"};align-self:center;margin-bottom:14px;transition:background 0.3s;"></div>`,
         );
 
+  const isEntregue = status === "Entregue";
+  const isSaiu = status === "Saiu para entrega";
+
   banner.innerHTML = `
-    <div style="background:${info.cor};padding:10px 16px;display:flex;align-items:center;gap:8px;">
-      <span style="font-size:1.4rem;">${info.emoji}</span>
-      <div>
-        <div style="color:#fff;font-weight:700;font-size:0.9rem;">Seu Pedido</div>
-        <div style="color:#ffffffcc;font-size:0.78rem;">${info.texto}</div>
+    <div style="background:${info.cor};padding:${isEntregue ? "14px" : "10px"} 16px;display:flex;align-items:center;gap:8px;">
+      <span style="font-size:${isEntregue ? "1.8rem" : "1.4rem"};">${info.emoji}</span>
+      <div style="flex:1;">
+        <div style="color:#fff;font-weight:800;font-size:${isEntregue ? "1rem" : "0.9rem"};">${info.texto}</div>
+        <div style="color:#ffffffdd;font-size:0.75rem;margin-top:2px;">${info.subtexto || ""}</div>
       </div>
-      <button onclick="event.stopPropagation();fecharTracking()" style="margin-left:auto;background:rgba(255,255,255,0.2);border:none;color:#fff;width:24px;height:24px;border-radius:50%;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;padding:0;line-height:1;">×</button>
+      <button onclick="event.stopPropagation();fecharTracking()" style="margin-left:auto;background:rgba(255,255,255,0.2);border:none;color:#fff;width:24px;height:24px;border-radius:50%;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;padding:0;line-height:1;flex-shrink:0;">×</button>
     </div>
-    <div style="padding:12px 16px;">
+    ${
+      !isEntregue
+        ? `<div style="padding:12px 16px;">
       <div style="display:flex;align-items:flex-start;gap:0;padding:0 4px;">
         ${passosHtml}
       </div>
-    </div>
+      ${isSaiu ? `<div style="text-align:center;font-size:0.72rem;color:#8b5cf6;font-weight:700;margin-top:4px;animation:pulse 1.5s infinite;">🏍️ Entregador a caminho!</div>` : ""}
+    </div>`
+        : ""
+    }
   `;
 
   // Salvar status atual no cache
@@ -222,8 +235,16 @@ function atualizarBannerStatus(status, pedido) {
         { transform: "translateX(-50%) scale(1.04)" },
         { transform: "translateX(-50%) scale(1)" },
       ],
-      { duration: 400, iterations: 2 },
+      { duration: 400, iterations: 3 },
     );
+  }
+
+  // Parar listener quando status é final (não precisa mais atualizar)
+  if (status === "Entregue" || status === "Cancelado") {
+    if (_unsubTracking) {
+      _unsubTracking();
+      _unsubTracking = null;
+    }
   }
 }
 
@@ -261,19 +282,18 @@ function abrirModalTracking() {
         <h3 style="margin:0;font-size:1.1rem;font-weight:800;">🔍 Acompanhar Pedido</h3>
         <button onclick="fecharModalTracking()" style="background:#f3f4f6;border:none;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:1.1rem;">×</button>
       </div>
-      <div style="background:${info.cor}15;border:1.5px solid ${info.cor}44;border-radius:12px;padding:14px 16px;margin-bottom:16px;display:flex;align-items:center;gap:12px;">
-        <span style="font-size:2rem;">${info.emoji}</span>
-        <div>
-          <div style="font-weight:800;color:${info.cor};font-size:1rem;">${info.texto}</div>
-          <div style="font-size:0.8rem;color:#6b7280;margin-top:2px;">Olá, ${ultimo.customerName || "Cliente"}!</div>
-        </div>
+      <div style="background:${info.cor}15;border:1.5px solid ${info.cor}44;border-radius:12px;padding:16px;margin-bottom:16px;text-align:center;">
+        <div style="font-size:2.5rem;margin-bottom:6px;">${info.emoji}</div>
+        <div style="font-weight:800;color:${info.cor};font-size:1.05rem;">${info.texto}</div>
+        <div style="font-size:0.8rem;color:#6b7280;margin-top:4px;">${info.subtexto || ""}</div>
       </div>
-      <div style="background:#f9fafb;border-radius:10px;padding:12px 14px;font-size:0.83rem;color:#374151;">
-        <div style="font-weight:700;margin-bottom:6px;">📋 Resumo do pedido:</div>
+      <div style="background:#f9fafb;border-radius:10px;padding:12px 14px;font-size:0.83rem;color:#374151;margin-bottom:12px;">
+        <div style="font-weight:700;margin-bottom:6px;color:#111;">👤 ${ultimo.customerName || "Cliente"}</div>
+        <div style="font-weight:700;margin-bottom:4px;">📋 Itens:</div>
         <div>${itensTxt}</div>
-        <div style="margin-top:8px;font-weight:700;color:#111;">${totalFmt}</div>
+        <div style="margin-top:8px;font-weight:800;color:#111;font-size:0.95rem;">${totalFmt}</div>
       </div>
-      <p style="font-size:0.75rem;color:#9ca3af;margin:12px 0 0;text-align:center;">
+      <p style="font-size:0.75rem;color:#9ca3af;margin:0;text-align:center;">
         Esta página atualiza automaticamente quando o status mudar.
       </p>
     </div>

@@ -447,6 +447,10 @@ function renderTabelaPedidos(pedidos) {
           <span class="badge-sm ${payClass}">${payLabels[payClass] || payClass}</span>
           <span class="badge-sm ${typeClass}">${typeLabels[typeClass] || typeClass}</span>
           <div style="margin-left:auto;display:flex;align-items:center;gap:0.5rem;">
+            <button class="btn-icon" title="Imprimir Comanda"
+              onclick="window._adminImprimirComanda('${p.id}')">
+              <i class="fa fa-print"></i>
+            </button>
             <label style="font-size:0.75rem;font-weight:700;">Status:</label>
             <select class="status-select" onchange="window._adminSetStatus('${p.id}', this.value)">
               ${statusOpts}
@@ -461,6 +465,40 @@ function renderTabelaPedidos(pedidos) {
 
 window._adminSetStatus = async (id, novoStatus) => {
   await atualizarStatus(id, novoStatus);
+};
+
+window._adminImprimirComanda = (id) => {
+  const p = _pedidosDia.find((x) => x.id === id);
+  if (!p) return;
+
+  const payload = {
+    id: p.id,
+    date: p.dataPedido?.toDate
+      ? p.dataPedido.toDate().toISOString()
+      : new Date().toISOString(),
+    customerName: p.clienteNome || "",
+    customerPhone: p.telefone || "",
+    items: (p.itens || []).map((i) => ({
+      name: i.name || i.nome,
+      quantity: i.quantity || i.quantidade || 1,
+      price: i.price || i.preco || 0,
+      size: i.size || i.tamanho || "",
+    })),
+    total: p.total || 0,
+    orderType: p.tipoPedido || "delivery",
+    paymentType: p.pagamento || "pix",
+    address: p.endereco || "",
+    troco: p.troco || 0,
+  };
+
+  try {
+    const encoded = btoa(encodeURIComponent(JSON.stringify(payload)));
+    const base = window.location.href.replace(/\/[^/]*$/, "/");
+    const url = base + "imprimir.html?d=" + encoded;
+    window.open(url, "_blank");
+  } catch (e) {
+    alert("Erro ao gerar comanda: " + e.message);
+  }
 };
 
 // ═══════════════════════════════════════════════════════════════════════════════
