@@ -451,6 +451,10 @@ function renderTabelaPedidos(pedidos) {
           <span class="badge-sm ${payClass}">${payLabels[payClass] || payClass}</span>
           <span class="badge-sm ${typeClass}">${typeLabels[typeClass] || typeClass}</span>
           <div style="margin-left:auto;display:flex;align-items:center;gap:0.5rem;">
+            <button class="btn-icon btn-icon-info" title="Ver Detalhes"
+              onclick="window._adminVerDetalhes('${p.id}')">
+              <i class="fa fa-list-alt"></i>
+            </button>
             <button class="btn-icon" title="Imprimir Comanda"
               onclick="window._adminImprimirComanda('${p.id}')">
               <i class="fa fa-print"></i>
@@ -471,6 +475,109 @@ window._adminSetStatus = async (id, novoStatus) => {
   await atualizarStatus(id, novoStatus);
 };
 
+window._adminVerDetalhes = (id) => {
+  const p = _pedidosDia.find((x) => x.id === id);
+  if (!p) return;
+
+  const sizeLabels = { P: "Pequena", M: "Média", G: "Grande" };
+  const payLabels = { pix: "Pix", cartao: "Cartão", dinheiro: "Dinheiro" };
+  const typeLabels = { delivery: "🛵 Delivery", retirada: "🏪 Retirada" };
+
+  const ts = p.dataPedido?.toDate ? p.dataPedido.toDate() : new Date(p.dataPedido);
+  const dataStr = ts.toLocaleString("pt-BR", {
+    day: "2-digit", month: "2-digit", year: "numeric",
+    hour: "2-digit", minute: "2-digit",
+  });
+
+  const itensHTML = (p.itens || []).map((item) => {
+    const nome = item.name || item.nome || "Item";
+    const qty = item.quantity || item.quantidade || 1;
+    const size = item.pizzaSize || item.size || item.tamanho || "";
+    const sizeLabel = sizeLabels[size] || size;
+    const secondFlavor = item.secondFlavor || item.metade || "";
+    const extras = item.extras || [];
+    const obs = item.obs || "";
+
+    let linhas = `<div class="det-item">`;
+    linhas += `<div class="det-item-nome">${qty}× ${nome}${sizeLabel ? ` <span class="det-tag">${sizeLabel}</span>` : ""}</div>`;
+    if (secondFlavor) {
+      linhas += `<div class="det-linha det-metade">🍕 Metade 2: <strong>${secondFlavor}</strong></div>`;
+    }
+    if (extras.length > 0) {
+      extras.forEach((e) => {
+        const label = typeof e === "object" ? e.label || e.name || "" : String(e);
+        if (label.trim()) {
+          linhas += `<div class="det-linha det-extra">➕ ${label}</div>`;
+        }
+      });
+    }
+    if (obs) {
+      linhas += `<div class="det-linha det-obs">⚠️ OBS: ${obs}</div>`;
+    }
+    linhas += `</div>`;
+    return linhas;
+  }).join("");
+
+  const trocoPart = p.troco
+    ? `<div class="det-info-row"><span>Troco para:</span><span>R$ ${Number(p.troco).toFixed(2)}</span></div>`
+    : "";
+
+  const endPart = p.endereco
+    ? `<div class="det-info-row"><span>Endereço:</span><span>${p.endereco}</span></div>`
+    : "";
+
+  const modalHTML = `
+  <div id="modal-detalhes" class="modal-overlay active" onclick="if(event.target===this) window._adminFecharDetalhes()">
+    <div class="modal-box" style="max-width:500px;max-height:85vh;overflow-y:auto;">
+      <div class="modal-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+        <h2 style="font-size:1.1rem;font-weight:800;color:#111;">📋 Detalhes do Pedido</h2>
+        <button onclick="window._adminFecharDetalhes()" style="background:none;border:none;cursor:pointer;font-size:1.3rem;color:#6b7280;">✕</button>
+      </div>
+
+      <div class="det-section">
+        <div class="det-info-row"><span>👤 Cliente:</span><strong>${p.clienteNome || "—"}</strong></div>
+        <div class="det-info-row"><span>📱 Telefone:</span><span>${p.telefone || "—"}</span></div>
+        <div class="det-info-row"><span>🕐 Data/Hora:</span><span>${dataStr}</span></div>
+        <div class="det-info-row"><span>💳 Pagamento:</span><span>${payLabels[p.pagamento] || p.pagamento || "—"}</span></div>
+        <div class="det-info-row"><span>🚚 Tipo:</span><span>${typeLabels[p.tipoPedido] || p.tipoPedido || "—"}</span></div>
+        ${endPart}
+        ${trocoPart}
+      </div>
+
+      <hr style="margin:1rem 0;border-color:#e5e7eb;">
+
+      <div style="font-weight:800;font-size:0.85rem;text-transform:uppercase;color:#6b7280;margin-bottom:0.75rem;letter-spacing:0.5px;">Itens do Pedido</div>
+      ${itensHTML}
+
+      <hr style="margin:1rem 0;border-color:#e5e7eb;">
+
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <span style="font-weight:800;font-size:1rem;">Total</span>
+        <span style="font-weight:900;font-size:1.1rem;color:#16a34a;">${(p.total || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}</span>
+      </div>
+
+      <div style="display:flex;gap:0.75rem;margin-top:1.25rem;">
+        <button onclick="window._adminImprimirComanda('${p.id}'); window._adminFecharDetalhes();"
+          style="flex:1;background:#e53e3e;color:#fff;border:none;border-radius:8px;padding:10px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;">
+          <i class="fa fa-print"></i> Imprimir Comanda
+        </button>
+        <button onclick="window._adminFecharDetalhes()"
+          style="flex:1;background:#f3f4f6;color:#374151;border:none;border-radius:8px;padding:10px;font-weight:700;cursor:pointer;">
+          Fechar
+        </button>
+      </div>
+    </div>
+  </div>`;
+
+  // Remove modal anterior se houver
+  document.getElementById("modal-detalhes")?.remove();
+  document.body.insertAdjacentHTML("beforeend", modalHTML);
+};
+
+window._adminFecharDetalhes = () => {
+  document.getElementById("modal-detalhes")?.remove();
+};
+
 window._adminImprimirComanda = (id) => {
   const p = _pedidosDia.find((x) => x.id === id);
   if (!p) return;
@@ -486,7 +593,10 @@ window._adminImprimirComanda = (id) => {
       name: i.name || i.nome,
       quantity: i.quantity || i.quantidade || 1,
       price: i.price || i.preco || 0,
-      size: i.size || i.tamanho || "",
+      pizzaSize: i.pizzaSize || i.size || i.tamanho || "",
+      secondFlavor: i.secondFlavor || i.metade || "",
+      extras: i.extras || [],
+      obs: i.obs || "",
     })),
     total: p.total || 0,
     orderType: p.tipoPedido || "delivery",
