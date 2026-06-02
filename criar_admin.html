@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Criar Usuário Admin — Pizzaria RA</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: sans-serif; background: #111; color: #eee; display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 2rem; }
+    .card { background: #1e1e1e; border-radius: 16px; padding: 2rem; max-width: 520px; width: 100%; box-shadow: 0 8px 32px #0008; }
+    h1 { font-size: 1.3rem; color: #f87171; margin-bottom: 0.4rem; }
+    p { font-size: 0.88rem; color: #9ca3af; margin-bottom: 1.5rem; line-height: 1.5; }
+    label { display: block; font-size: 0.82rem; font-weight: 700; color: #d1d5db; margin-bottom: 0.3rem; margin-top: 1rem; }
+    input { width: 100%; padding: 0.65rem 0.85rem; border-radius: 8px; border: 1px solid #374151; background: #111; color: #eee; font-size: 0.92rem; }
+    button { width: 100%; margin-top: 1.5rem; padding: 0.85rem; border: none; border-radius: 10px; background: #dc2626; color: #fff; font-size: 1rem; font-weight: 700; cursor: pointer; }
+    button:hover:not(:disabled) { background: #b91c1c; }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+    #log { margin-top: 1.25rem; background: #111; border-radius: 8px; padding: 0.85rem; font-size: 0.78rem; font-family: monospace; display: none; }
+    .ok  { color: #4ade80; } .err { color: #f87171; } .inf { color: #60a5fa; }
+  </style>
+</head>
+<body>
+<div class="card">
+  <h1>🔐 Criar Usuário Admin</h1>
+  <p>Use o mesmo e-mail e senha que você cadastrou no Firebase Authentication. Este script cria o documento na coleção <code>usuarios</code> que o painel admin precisa para reconhecer você como administrador.</p>
+
+  <label>E-mail do admin</label>
+  <input type="email" id="email" value="pizzariadorael@gmail.com" />
+
+  <label>Senha</label>
+  <input type="password" id="senha" placeholder="Sua senha do Firebase Auth" />
+
+  <label>Nome exibido no painel</label>
+  <input type="text" id="nome" value="Admin Ian" />
+
+  <button id="btn" onclick="criarAdmin()">▶ Criar perfil admin</button>
+  <div id="log"></div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+  import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyBm9XjET1VETadadyq9MOSij1f4ND_4SI4",
+    authDomain: "pizzaria-rael.firebaseapp.com",
+    projectId: "pizzaria-rael",
+    storageBucket: "pizzaria-rael.firebasestorage.app",
+    messagingSenderId: "737517289116",
+    appId: "1:737517289116:web:1a49ac56da1b21e25b3759",
+  };
+
+  const app  = initializeApp(firebaseConfig);
+  const db   = getFirestore(app);
+  const auth = getAuth(app);
+
+  function log(msg, tipo = "inf") {
+    const el = document.getElementById("log");
+    el.style.display = "block";
+    const line = document.createElement("div");
+    line.className = tipo;
+    line.textContent = msg;
+    el.appendChild(line);
+  }
+
+  window.criarAdmin = async function () {
+    const email = document.getElementById("email").value.trim();
+    const senha = document.getElementById("senha").value;
+    const nome  = document.getElementById("nome").value.trim();
+    const btn   = document.getElementById("btn");
+
+    if (!email || !senha || !nome) { alert("Preencha todos os campos."); return; }
+
+    btn.disabled = true;
+    btn.textContent = "⏳ Criando...";
+    document.getElementById("log").innerHTML = "";
+
+    try {
+      log("🔐 Autenticando no Firebase Auth...");
+      const cred = await signInWithEmailAndPassword(auth, email, senha);
+      const uid  = cred.user.uid;
+      log("✅ Autenticado! UID: " + uid, "ok");
+
+      log("📝 Criando documento em usuarios/" + uid + "...");
+      await setDoc(doc(db, "usuarios", uid), {
+        nome,
+        email,
+        perfil: "admin",
+        criadoEm: new Date().toISOString(),
+      });
+
+      log("✅ Perfil admin criado com sucesso!", "ok");
+      log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+      log("🎉 Agora acesse admin.html e faça login normalmente.", "ok");
+
+      btn.textContent = "✔ Concluído!";
+    } catch (err) {
+      log("❌ Erro: " + err.message, "err");
+      btn.disabled = false;
+      btn.textContent = "▶ Tentar novamente";
+    }
+  };
+</script>
+</body>
+</html>

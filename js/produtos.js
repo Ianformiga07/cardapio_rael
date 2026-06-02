@@ -39,41 +39,51 @@ const produtosRef = collection(db, "produtos");
 //
 // CORREÇÃO: removido orderBy composto (requer índice). Ordenação feita no JS.
 export function watchProdutos(callback) {
-  const q = query(
+  // Busca todos e filtra ativo=true no JS (evita exigir índice composto no Firestore)
+  return onSnapshot(
     produtosRef,
-    where("ativo", "==", true)
+    (snap) => {
+      const produtos = snap.docs
+        .map((d) => ({ id: d.id, ...d.data() }))
+        .filter((p) => p.ativo !== false)
+        .sort((a, b) => {
+          const ordem = { pizza: 0, hamburguer: 1, bebida: 2 };
+          const ca = ordem[a.categoria] ?? 3;
+          const cb = ordem[b.categoria] ?? 3;
+          if (ca !== cb) return ca - cb;
+          return (a.nome || "").localeCompare(b.nome || "", "pt-BR");
+        });
+      callback(produtos);
+    },
+    (err) => {
+      console.error("[produtos] Erro no listener:", err);
+    },
   );
-
-  return onSnapshot(q, (snap) => {
-    const produtos = snap.docs
-      .map((d) => ({ id: d.id, ...d.data() }))
-      .sort((a, b) => {
-        const catA = (a.categoria || "").localeCompare(b.categoria || "", "pt-BR");
-        if (catA !== 0) return catA;
-        return (a.nome || "").localeCompare(b.nome || "", "pt-BR");
-      });
-    callback(produtos);
-  }, (err) => {
-    console.error("[produtos] Erro no listener:", err);
-  });
 }
 
 // ─── LISTENER EM TEMPO REAL (admin.html) ─────────────────────────────────────
 // Traz TODOS os produtos (ativos e inativos) para o admin gerenciar.
 // CORREÇÃO: removido orderBy composto (requer índice). Ordenação feita no JS.
 export function watchProdutosAdmin(callback) {
-  return onSnapshot(produtosRef, (snap) => {
-    const produtos = snap.docs
-      .map((d) => ({ id: d.id, ...d.data() }))
-      .sort((a, b) => {
-        const catA = (a.categoria || "").localeCompare(b.categoria || "", "pt-BR");
-        if (catA !== 0) return catA;
-        return (a.nome || "").localeCompare(b.nome || "", "pt-BR");
-      });
-    callback(produtos);
-  }, (err) => {
-    console.error("[produtos] Erro no listener admin:", err);
-  });
+  return onSnapshot(
+    produtosRef,
+    (snap) => {
+      const produtos = snap.docs
+        .map((d) => ({ id: d.id, ...d.data() }))
+        .sort((a, b) => {
+          const catA = (a.categoria || "").localeCompare(
+            b.categoria || "",
+            "pt-BR",
+          );
+          if (catA !== 0) return catA;
+          return (a.nome || "").localeCompare(b.nome || "", "pt-BR");
+        });
+      callback(produtos);
+    },
+    (err) => {
+      console.error("[produtos] Erro no listener admin:", err);
+    },
+  );
 }
 
 // ─── MARCAR / DESMARCAR ESGOTADO ─────────────────────────────────────────────
