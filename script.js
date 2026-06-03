@@ -198,12 +198,10 @@ function openExtrasModal(name, price, isPizza, pizzaPrices) {
           : "";
     }
 
-    // Segundo sabor
-    secondFlavorSection.style.display = "block";
-    Array.from(secondFlavorSelect.options).forEach((opt) => {
-      opt.style.display = opt.value === name ? "none" : "";
-    });
+    // Segundo sabor — começa oculto; só aparece se M ou G for selecionado
+    secondFlavorSection.style.display = "none";
     secondFlavorSelect.value = "";
+    window._pendingPizzaName = name; // usado por selectPizzaSize para filtrar o select
   } else {
     // Sanduíche/bebida: mostrar adicionais, ocultar pizza
     if (pizzaSizeSection) pizzaSizeSection.style.display = "none";
