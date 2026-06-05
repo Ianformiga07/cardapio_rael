@@ -19,7 +19,7 @@ const EXTRAS_LIST = [
 ];
 
 // ─── CHAVE PIX ────────────────────────────────────────────────────────────────
-const PIX_KEY = "63992863557";
+const PIX_KEY = "63992019168";
 
 // ─── VARIÁVEIS GLOBAIS ────────────────────────────────────────────────────────
 const menu = document.getElementById("menu");
@@ -773,7 +773,7 @@ async function confirmPIXPayment() {
   const pixNote =
     "\n\n━━━━━━━━━━━━━━━━━━━━\n\n📎 *Por favor, envie o comprovante do PIX nesta conversa para confirmarmos seu pedido!* ✅";
   const message = encodeURIComponent(baseText + pixNote + trackingLine);
-  window.open(`https://wa.me/63992863557?text=${message}`, "_blank");
+  window.open(`https://wa.me/63992019168?text=${message}`, "_blank");
 
   setTimeout(() => {
     document.getElementById("pix-modal").style.display = "none";
@@ -840,7 +840,7 @@ async function sendOrderToWhatsApp(orderData) {
 
   // 4. Abrir WhatsApp com o link de acompanhamento
   const message = encodeURIComponent(orderData.whatsappText + trackingLine);
-  window.open("https://wa.me/63992863557?text=" + message, "_blank");
+  window.open("https://wa.me/63992019168?text=" + message, "_blank");
 
   // 5. Limpar estado
   cart.length = 0;
@@ -1051,8 +1051,9 @@ customerPhone.addEventListener("input", () => {
 
 // ─── HORÁRIO ──────────────────────────────────────────────────────────────────
 const spanItem = document.getElementById("date-span");
-const hora = new Date().getHours();
-const isOpen = hora >= 18 && hora < 23;
+const _agora = new Date();
+const _totalMin = _agora.getHours() * 60 + _agora.getMinutes();
+const isOpen = _totalMin >= 18 * 60 + 40 && _totalMin < 23 * 60;
 if (isOpen) {
   spanItem.classList.add("open");
   spanItem.classList.remove("closed");
@@ -1178,4 +1179,4 @@ window.openHistoryModal = openHistoryModal;
 window.clearHistory = clearHistory;
 window.closePIXModal = closePIXModal;
 window.confirmPIXPayment = confirmPIXPayment;
-window.copyPIXKey = copyPIXKey;
+window.copyPIXKey = copyPIXKey; 
