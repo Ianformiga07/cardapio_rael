@@ -62,21 +62,24 @@
         background: #333;
       }
 
-      /* COMANDA — otimizada para impressora térmica 58mm */
+      /* ══════════════════════════════════════
+         CUPOM — preview na tela
+      ══════════════════════════════════════ */
       .cupom {
-        width: 260px;
+        width: 300px;
         background: #fff;
         padding: 10px 8px;
-        font-size: 13px;
-        line-height: 1.6;
+        font-size: 14px;
+        line-height: 1.7;
         color: #000;
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.18);
         border-radius: 4px;
+        font-family: "Courier New", Courier, monospace;
       }
 
       .cupom .logo {
         text-align: center;
-        font-size: 18px;
+        font-size: 20px;
         font-weight: 900;
         letter-spacing: 1px;
         text-transform: uppercase;
@@ -84,13 +87,13 @@
       }
       .cupom .subtitulo {
         text-align: center;
-        font-size: 12px;
-        font-weight: 700;
+        font-size: 13px;
+        font-weight: 900;
         letter-spacing: 2px;
         text-transform: uppercase;
         background: #000;
         color: #fff;
-        padding: 3px 4px;
+        padding: 4px;
         margin-bottom: 6px;
       }
 
@@ -101,119 +104,110 @@
       }
       .cupom .sep-solid {
         border: none;
-        border-top: 2px solid #000;
+        border-top: 3px solid #000;
         margin: 6px 0;
       }
-
       .cupom .center {
         text-align: center;
       }
 
       /* NÚMERO DO PEDIDO */
       .cupom .pedido-num {
-        font-size: 28px;
+        font-size: 36px;
         font-weight: 900;
         text-align: center;
         margin: 6px 0 3px;
-        letter-spacing: 2px;
+        letter-spacing: 4px;
         border: 3px solid #000;
-        padding: 4px 0;
+        padding: 6px 0;
       }
 
       /* ITENS */
       .cupom .itens-titulo {
-        font-size: 14px;
+        font-size: 15px;
         font-weight: 900;
         text-transform: uppercase;
         letter-spacing: 1px;
         margin: 6px 0 4px;
       }
 
-      /* Bloco de cada item — caixa com borda */
       .cupom .item-bloco {
         border: 2px solid #000;
         border-radius: 2px;
-        margin-top: 7px;
+        margin-top: 8px;
         overflow: hidden;
       }
 
-      /* Nome do item — fundo preto, letra branca, bem grande */
       .cupom .item-nome {
         font-weight: 900;
-        font-size: 14px;
+        font-size: 16px;
         background: #000;
         color: #fff;
-        padding: 4px 7px;
+        padding: 5px 8px;
+        line-height: 1.4;
       }
 
-      /* Tamanho da pizza — fundo cinza claro */
       .cupom .item-tamanho {
         font-weight: 900;
-        font-size: 13px;
+        font-size: 14px;
         background: #e8e8e8;
-        padding: 3px 7px;
+        padding: 4px 8px;
         border-bottom: 1px solid #ccc;
         text-transform: uppercase;
-        letter-spacing: 0.5px;
       }
 
-      /* Segunda metade da pizza */
       .cupom .item-metade {
         font-weight: 900;
-        font-size: 13px;
-        padding: 3px 7px;
+        font-size: 14px;
+        padding: 4px 8px;
         border-bottom: 1px dashed #aaa;
       }
 
-      /* Adicionais / extras */
       .cupom .item-extra {
         font-weight: 700;
-        font-size: 12px;
-        padding: 2px 7px;
+        font-size: 13px;
+        padding: 3px 8px;
         border-bottom: 1px dashed #ccc;
       }
 
-      /* Observação — fundo PRETO destaque máximo para cozinha */
       .cupom .item-obs {
         font-weight: 900;
-        font-size: 13px;
-        padding: 4px 7px;
+        font-size: 14px;
+        padding: 5px 8px;
         background: #000;
         color: #fff;
-        letter-spacing: 0.3px;
       }
 
       /* TIPO DE ENTREGA */
       .cupom .entrega-box {
         border: 3px solid #000;
-        padding: 6px 8px;
+        padding: 7px 8px;
         margin: 8px 0 4px;
         font-weight: 900;
-        font-size: 15px;
+        font-size: 17px;
         text-align: center;
         text-transform: uppercase;
         letter-spacing: 1px;
       }
 
-      /* ENDEREÇO (delivery) */
       .cupom .endereco-box {
-        font-size: 11px;
+        font-size: 13px;
         font-weight: 700;
-        padding: 4px 6px;
+        padding: 5px 6px;
         border: 1px dashed #000;
         margin-bottom: 6px;
-        line-height: 1.4;
+        line-height: 1.5;
       }
 
-      /* CLIENTE (rodapé) */
       .cupom .cliente-box {
-        font-size: 12px;
+        font-size: 13px;
+        font-weight: 700;
         margin-top: 6px;
         padding-top: 4px;
         border-top: 1px dashed #000;
-        color: #333;
+        color: #000;
         text-align: center;
-        line-height: 1.6;
+        line-height: 1.8;
       }
 
       /* ERRO */
@@ -230,26 +224,146 @@
         margin-bottom: 12px;
       }
 
-      /* IMPRESSÃO — térmica 58mm */
+      /* ══════════════════════════════════════
+         IMPRESSÃO TÉRMICA 58mm — MPT-II
+         
+         Estratégia:
+         - @page: 58mm de largura, altura automática
+         - font-size base 16px (≈ 12pt) — legível na térmica
+         - font-weight: 900 em todo o documento
+         - -webkit-print-color-adjust para manter fundos pretos
+         - sem margens laterais excessivas
+      ══════════════════════════════════════ */
       @media print {
+        * {
+          -webkit-print-color-adjust: exact !important;
+          print-color-adjust: exact !important;
+          color-adjust: exact !important;
+        }
+
+        html,
         body {
-          background: #fff;
-          padding: 0;
-          display: block;
+          background: #fff !important;
+          margin: 0 !important;
+          padding: 0 !important;
+          width: 58mm !important;
         }
+
         .top-bar {
-          display: none;
+          display: none !important;
         }
+
         .cupom {
-          width: 100%;
-          box-shadow: none;
-          border-radius: 0;
-          font-size: 13px;
-          padding: 4px 3px;
+          width: 54mm !important; /* 58mm - 2mm de cada lado */
+          max-width: 54mm !important;
+          margin: 0 auto !important;
+          padding: 2mm 1mm !important;
+          box-shadow: none !important;
+          border-radius: 0 !important;
+          font-size: 16px !important; /* BASE: bem legível na térmica */
+          font-weight: 900 !important;
+          line-height: 1.6 !important;
         }
+
+        /* Forçar negrito em todos os elementos */
+        .cupom * {
+          font-weight: 900 !important;
+        }
+
+        .cupom .logo {
+          font-size: 20px !important;
+          margin-bottom: 2mm !important;
+        }
+
+        .cupom .subtitulo {
+          font-size: 14px !important;
+          padding: 3px 2px !important;
+          margin-bottom: 3mm !important;
+          background: #000 !important;
+          color: #fff !important;
+        }
+
+        .cupom .pedido-num {
+          font-size: 38px !important; /* GRANDE — número do pedido é o mais importante */
+          border: 3px solid #000 !important;
+          padding: 3mm 0 !important;
+          margin: 2mm 0 !important;
+          letter-spacing: 3px !important;
+        }
+
+        .cupom .itens-titulo {
+          font-size: 16px !important;
+          margin: 2mm 0 1mm !important;
+        }
+
+        .cupom .item-bloco {
+          border: 2px solid #000 !important;
+          margin-top: 2mm !important;
+          page-break-inside: avoid !important;
+        }
+
+        .cupom .item-nome {
+          font-size: 17px !important; /* Nome do item bem grande */
+          padding: 2mm 2mm !important;
+          background: #000 !important;
+          color: #fff !important;
+          line-height: 1.3 !important;
+        }
+
+        .cupom .item-tamanho {
+          font-size: 15px !important;
+          padding: 1.5mm 2mm !important;
+          background: #ddd !important;
+        }
+
+        .cupom .item-metade {
+          font-size: 15px !important;
+          padding: 1.5mm 2mm !important;
+        }
+
+        .cupom .item-extra {
+          font-size: 14px !important;
+          padding: 1mm 2mm !important;
+        }
+
+        .cupom .item-obs {
+          font-size: 16px !important; /* Observação bem visível */
+          padding: 2mm 2mm !important;
+          background: #000 !important;
+          color: #fff !important;
+        }
+
+        .cupom .entrega-box {
+          font-size: 18px !important; /* Tipo de entrega bem grande */
+          border: 3px solid #000 !important;
+          padding: 2mm !important;
+          margin: 2mm 0 !important;
+        }
+
+        .cupom .endereco-box {
+          font-size: 14px !important;
+          padding: 1.5mm !important;
+          line-height: 1.5 !important;
+        }
+
+        .cupom .cliente-box {
+          font-size: 14px !important;
+          padding-top: 2mm !important;
+          margin-top: 2mm !important;
+          line-height: 1.7 !important;
+        }
+
+        .cupom .sep {
+          margin: 2mm 0 !important;
+        }
+        .cupom .sep-solid {
+          border-top-width: 2px !important;
+          margin: 2mm 0 !important;
+        }
+
         @page {
           size: 58mm auto;
-          margin: 1mm 2mm;
+          margin: 0mm 2mm;
         }
       }
     </style>
@@ -287,61 +401,57 @@
         /* 2. Helpers */
         const sizeLabels = { P: "PEQUENA", M: "MÉDIA", G: "GRANDE" };
 
-        /* 3. Montar itens — TODOS os detalhes para a cozinha */
+        /* 3. Montar itens */
         let itensHTML = "";
 
         order.items.forEach((item) => {
           let detalhes = "";
 
-          // ── Tamanho da pizza (P / M / G)
           if (item.pizzaSize && item.pizzaSize.trim()) {
             const tam = sizeLabels[item.pizzaSize] || item.pizzaSize;
-            detalhes += `<div class="item-tamanho">📏 TAMANHO: ${tam}</div>`;
+            detalhes += `<div class="item-tamanho">TAMANHO: ${tam}</div>`;
           }
 
-          // ── Segunda metade (pizza meio-a-meio)
           if (item.secondFlavor && item.secondFlavor.trim()) {
-            detalhes += `<div class="item-metade">🍕 METADE 2: ${item.secondFlavor}</div>`;
+            detalhes += `<div class="item-metade">METADE 2: ${item.secondFlavor}</div>`;
           }
 
-          // ── Adicionais / extras
           if (item.extras && item.extras.length > 0) {
             item.extras.forEach((e) => {
               const label =
                 typeof e === "object" ? e.label || e.name || "" : String(e);
               if (label.trim()) {
-                detalhes += `<div class="item-extra">➕ ${label}</div>`;
+                detalhes += `<div class="item-extra">+ ${label}</div>`;
               }
             });
           }
 
-          // ── Observação (ingredientes a retirar, pedidos especiais etc.)
           if (item.obs && item.obs.trim()) {
-            detalhes += `<div class="item-obs">⚠️ OBS: ${item.obs.trim().toUpperCase()}</div>`;
+            detalhes += `<div class="item-obs">OBS: ${item.obs.trim().toUpperCase()}</div>`;
           }
 
           itensHTML += `
       <div class="item-bloco">
-        <div class="item-nome">${item.quantity}× ${item.name}</div>
+        <div class="item-nome">${item.quantity}x ${item.name}</div>
         ${detalhes}
       </div>`;
         });
 
         /* 4. Tipo de entrega */
         const orderLabels = {
-          delivery: "🛵 DELIVERY",
-          retirada: "🏪 RETIRADA",
+          delivery: "DELIVERY",
+          retirada: "RETIRADA NA LOJA",
         };
         const tipoEntrega =
           orderLabels[order.orderType] || (order.orderType || "").toUpperCase();
 
-        /* 5. Endereço (apenas delivery) */
+        /* 5. Endereço */
         const enderecoHTML =
           order.orderType === "delivery" && order.address
-            ? `<div class="endereco-box">📍 ${order.address}</div>`
+            ? `<div class="endereco-box">ENDERECO: ${order.address}</div>`
             : "";
 
-        /* 6. Número do pedido (4 últimos caracteres) */
+        /* 6. Número do pedido */
         const numPedido = String(order.id || Date.now())
           .slice(-4)
           .toUpperCase();
@@ -355,15 +465,15 @@
         /* 8. Comanda HTML */
         const cupomHTML = `
     <div class="cupom" id="cupom">
-      <div class="logo">🍕 Pizzaria RA</div>
-      <div class="subtitulo">— comanda de produção —</div>
+      <div class="logo">PIZZARIA RA</div>
+      <div class="subtitulo">COMANDA DE PRODUCAO</div>
 
       <div class="pedido-num">#${numPedido}</div>
-      <div class="center" style="font-size:11px;margin-bottom:4px;color:#555;">${dataHora}</div>
+      <div class="center" style="font-size:12px;margin-bottom:4px;font-weight:700;">${dataHora}</div>
 
       <hr class="sep-solid">
 
-      <div class="itens-titulo">📋 Itens a Preparar:</div>
+      <div class="itens-titulo">ITENS A PREPARAR:</div>
       ${itensHTML}
 
       <hr class="sep">
@@ -372,8 +482,8 @@
       ${enderecoHTML}
 
       <div class="cliente-box">
-        👤 ${order.customerName || "—"}<br>
-        📱 ${order.customerPhone || "—"}
+        CLIENTE: ${order.customerName || "---"}<br>
+        FONE: ${order.customerPhone || "---"}
       </div>
     </div>`;
 
@@ -385,7 +495,7 @@
     </div>
     ${cupomHTML}`;
 
-        /* 10. Auto-print se veio com ?print=1 */
+        /* 10. Auto-print */
         if (params.get("print") === "1") {
           window.addEventListener("load", () =>
             setTimeout(() => window.print(), 600),
