@@ -505,16 +505,16 @@
           payLabels[order.paymentType] ||
           (order.paymentType || "").toUpperCase();
         let trocoHTML = "";
-        if (
-          order.paymentType === "dinheiro" &&
-          order.troco &&
-          order.troco > 0
-        ) {
-          const trocoDevolver = (order.troco - (order.total || 0))
-            .toFixed(2)
-            .replace(".", ",");
-          const trocoPara = order.troco.toFixed(2).replace(".", ",");
-          trocoHTML = `<div class="pag-troco">Troco p/ R$&nbsp;${trocoPara} → R$&nbsp;${trocoDevolver}</div>`;
+        if (order.paymentType === "dinheiro") {
+          const valorPago = parseFloat(order.troco) || 0;
+          const totalPedido = parseFloat(order.total) || 0;
+          if (valorPago > 0) {
+            const trocoDevolver = Math.max(0, valorPago - totalPedido)
+              .toFixed(2)
+              .replace(".", ",");
+            const trocoPara = valorPago.toFixed(2).replace(".", ",");
+            trocoHTML = `<div class="pag-troco">Paga com: R$&nbsp;${trocoPara}<br>Troco a devolver: R$&nbsp;${trocoDevolver}</div>`;
+          }
         }
         const pagamentoHTML = `
           <div class="pag-box">
