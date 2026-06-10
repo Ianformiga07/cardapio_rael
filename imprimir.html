@@ -190,6 +190,36 @@
         letter-spacing: 1px;
       }
 
+      /* PAGAMENTO */
+      .cupom .pag-box {
+        border: 2px solid #000;
+        border-radius: 2px;
+        margin: 6px 0 4px;
+        overflow: hidden;
+      }
+      .cupom .pag-label {
+        background: #555;
+        color: #fff;
+        font-weight: 900;
+        font-size: 11px;
+        padding: 3px 8px;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+      }
+      .cupom .pag-valor {
+        font-weight: 900;
+        font-size: 16px;
+        padding: 5px 8px;
+        text-transform: uppercase;
+      }
+      .cupom .pag-troco {
+        font-weight: 700;
+        font-size: 13px;
+        padding: 3px 8px 5px;
+        color: #333;
+        border-top: 1px dashed #ccc;
+      }
+
       .cupom .endereco-box {
         font-size: 13px;
         font-weight: 700;
@@ -340,6 +370,26 @@
           margin: 2mm 0 !important;
         }
 
+        .cupom .pag-box {
+          border: 2px solid #000 !important;
+          margin: 2mm 0 !important;
+          page-break-inside: avoid !important;
+        }
+        .cupom .pag-label {
+          font-size: 11px !important;
+          padding: 2px 2mm !important;
+          background: #555 !important;
+          color: #fff !important;
+        }
+        .cupom .pag-valor {
+          font-size: 16px !important;
+          padding: 2mm !important;
+        }
+        .cupom .pag-troco {
+          font-size: 13px !important;
+          padding: 1mm 2mm 2mm !important;
+        }
+
         .cupom .endereco-box {
           font-size: 14px !important;
           padding: 1.5mm !important;
@@ -437,13 +487,41 @@
       </div>`;
         });
 
-        /* 4. Tipo de entrega */
+        /* TIPO DE ENTREGA */
         const orderLabels = {
           delivery: "DELIVERY",
           retirada: "RETIRADA NA LOJA",
         };
         const tipoEntrega =
           orderLabels[order.orderType] || (order.orderType || "").toUpperCase();
+
+        /* 5. Pagamento */
+        const payLabels = {
+          pix: "💠 PIX",
+          cartao: "💳 CARTÃO",
+          dinheiro: "💵 DINHEIRO",
+        };
+        const pagLabel =
+          payLabels[order.paymentType] ||
+          (order.paymentType || "").toUpperCase();
+        let trocoHTML = "";
+        if (
+          order.paymentType === "dinheiro" &&
+          order.troco &&
+          order.troco > 0
+        ) {
+          const trocoDevolver = (order.troco - (order.total || 0))
+            .toFixed(2)
+            .replace(".", ",");
+          const trocoPara = order.troco.toFixed(2).replace(".", ",");
+          trocoHTML = `<div class="pag-troco">Troco p/ R$&nbsp;${trocoPara} → R$&nbsp;${trocoDevolver}</div>`;
+        }
+        const pagamentoHTML = `
+          <div class="pag-box">
+            <div class="pag-label">PAGAMENTO</div>
+            <div class="pag-valor">${pagLabel}</div>
+            ${trocoHTML}
+          </div>`;
 
         /* 5. Endereço */
         const enderecoHTML =
@@ -462,8 +540,12 @@
           dataHora = new Date(order.date).toLocaleString("pt-BR");
         } catch (_) {}
 
-        /* 8. Comanda HTML */
-        const cupomHTML = `
+        /* 9. Renderizar */
+        app.innerHTML = `
+    <div class="top-bar">
+      <button class="btn-print" onclick="window.print()">🖨️ Imprimir Comanda</button>
+      <button class="btn-close" onclick="window.close()">✕ Fechar</button>
+    </div>
     <div class="cupom" id="cupom">
       <div class="logo">PIZZARIA RA</div>
       <div class="subtitulo">COMANDA DE PRODUCAO</div>
@@ -481,19 +563,13 @@
       <div class="entrega-box">${tipoEntrega}</div>
       ${enderecoHTML}
 
+      ${pagamentoHTML}
+
       <div class="cliente-box">
         CLIENTE: ${order.customerName || "---"}<br>
         FONE: ${order.customerPhone || "---"}
       </div>
     </div>`;
-
-        /* 9. Renderizar */
-        app.innerHTML = `
-    <div class="top-bar">
-      <button class="btn-print" onclick="window.print()">🖨️ Imprimir Comanda</button>
-      <button class="btn-close" onclick="window.close()">✕ Fechar</button>
-    </div>
-    ${cupomHTML}`;
 
         /* 10. Auto-print */
         if (params.get("print") === "1") {
