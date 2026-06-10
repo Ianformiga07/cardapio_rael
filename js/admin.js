@@ -540,9 +540,15 @@ window._adminVerDetalhes = (id) => {
   const endPart = p.endereco
     ? `<div class="dmt-info-row"><span class="dmt-label"><i class="fa fa-map-marker-alt"></i> Endereço</span><span class="dmt-value">${p.endereco}</span></div>`
     : "";
-  const trocoPart = p.troco
-    ? `<div class="dmt-info-row"><span class="dmt-label"><i class="fa fa-coins"></i> Troco para</span><span class="dmt-value">R$ ${Number(p.troco).toFixed(2)}</span></div>`
-    : "";
+  const trocoPart =
+    p.pagamento === "dinheiro" && p.troco && Number(p.troco) > 0
+      ? (() => {
+          const valorPago = Number(p.troco);
+          const trocoDevolver = Math.max(0, valorPago - (p.total || 0));
+          return `<div class="dmt-info-row"><span class="dmt-label"><i class="fa fa-coins"></i> Paga com</span><span class="dmt-value">R$ ${valorPago.toFixed(2)}</span></div>
+          <div class="dmt-info-row"><span class="dmt-label"><i class="fa fa-hand-holding-usd"></i> Troco a devolver</span><span class="dmt-value" style="color:#16a34a;font-weight:800;">R$ ${trocoDevolver.toFixed(2)}</span></div>`;
+        })()
+      : "";
 
   const totalFmt = (p.total || 0).toLocaleString("pt-BR", {
     style: "currency",

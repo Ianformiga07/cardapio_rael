@@ -600,6 +600,7 @@ function buildOrderData() {
     date: orderDate,
     id: orderId,
     printLink,
+    troco: paymentType === "dinheiro" ? parseFloat(changeValue.value) || 0 : 0,
   };
 }
 
@@ -1179,4 +1180,4 @@ window.openHistoryModal = openHistoryModal;
 window.clearHistory = clearHistory;
 window.closePIXModal = closePIXModal;
 window.confirmPIXPayment = confirmPIXPayment;
-window.copyPIXKey = copyPIXKey; 
+window.copyPIXKey = copyPIXKey;
