@@ -504,10 +504,12 @@
         const pagLabel =
           payLabels[order.paymentType] ||
           (order.paymentType || "").toUpperCase();
+        const totalPedido = parseFloat(order.total) || 0;
+        const totalFormatado = totalPedido.toFixed(2).replace(".", ",");
+
         let trocoHTML = "";
         if (order.paymentType === "dinheiro") {
           const valorPago = parseFloat(order.troco) || 0;
-          const totalPedido = parseFloat(order.total) || 0;
           if (valorPago > 0) {
             const trocoDevolver = Math.max(0, valorPago - totalPedido)
               .toFixed(2)
@@ -520,6 +522,7 @@
           <div class="pag-box">
             <div class="pag-label">PAGAMENTO</div>
             <div class="pag-valor">${pagLabel}</div>
+            <div class="pag-troco">Valor total: R$&nbsp;${totalFormatado}</div>
             ${trocoHTML}
           </div>`;
 
